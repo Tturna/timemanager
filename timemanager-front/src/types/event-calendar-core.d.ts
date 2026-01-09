@@ -4,7 +4,7 @@ declare module '@event-calendar/core' {
         | { html: string }
         | { domNodes: Node[] }
 
-    export interface Event {
+    export interface CalendarEvent {
         id: string,
         resourceIds: any[],
         allDay: bool,
@@ -20,6 +20,34 @@ declare module '@event-calendar/core' {
         classNames: any[],
         styles: any[],
         extendedProps: {}
+    }
+
+    export interface Resource {
+        id: string,
+        title: Content,
+        eventBackgroundColor?: string,
+        eventTextColor?: string,
+        extendedProps: {}
+    }
+
+    export interface View {
+        type: any,
+        title: any,
+        currentStart: Date,
+        currentEnd: Date,
+        activeStart: Date,
+        activeEnd: Date
+    }
+
+    export interface SelectionInfo {
+        start: Date,
+        end: Date,
+        startStr: string,
+        endStr: string,
+        allDay: bool,
+        jsEvent: Event,
+        view: any,
+        resource?: Resource
     }
 
     export function createCalendar(...args: any[]): any;

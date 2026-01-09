@@ -1,12 +1,14 @@
-import { useEffect, useRef } from 'react';
-import { createCalendar, destroyCalendar, TimeGrid, DayGrid, List, Interaction, type Event } from '@event-calendar/core';
+import { useState, useEffect, useRef } from 'react';
+import { createCalendar, destroyCalendar, TimeGrid, DayGrid, List, Interaction,
+    type CalendarEvent, type SelectionInfo } from '@event-calendar/core';
 // Import CSS if your build tool supports it
 import '@event-calendar/core/index.css';
+import AddEventModal from './AddEventModal';
 
 function Calendar() {
     const calendarRef = useRef<any>(null)
     const calendarParentRef = useRef<HTMLDivElement | null>(null)
-    const eventsRef = useRef<Event[]>(
+    const eventsRef = useRef<CalendarEvent[]>(
         [
             {
                 id: "1",
@@ -23,12 +25,11 @@ function Calendar() {
         ]
     )
 
+    const [ isCreatingEvent, setCreatingEvent ] = useState(false)
+    const selectionInfoRef = useRef<SelectionInfo | null>(null)
+
     const dayStrings = [
         "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-    ]
-
-    const monthStrings = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dev"
     ]
 
     const dayHeaderFormatter = (date: Date) => {
@@ -56,6 +57,12 @@ function Calendar() {
         calendarRef.current.addEvent(newEvent)
     }
 
+    const openModal = (info: SelectionInfo) => {
+        selectionInfoRef.current = info
+        setCreatingEvent(true)
+    }
+    const closeModal = () => setCreatingEvent(false)
+
     useEffect(() => {
         calendarRef.current = createCalendar(
             // HTML element the calendar will be mounted to
@@ -72,7 +79,9 @@ function Calendar() {
                 dayHeaderFormat: dayHeaderFormatter,
                 firstDay: 1,
                 scrollTime: "06:00:00",
-                height: "100%"
+                height: "100%",
+                select: openModal,
+                unselectAuto: false
             }
         );
 
@@ -89,6 +98,11 @@ function Calendar() {
         <>
         <button onClick={addEvent}>Add</button>
         <div ref={calendarParentRef} id="calendar"></div>
+        {
+            isCreatingEvent &&
+            selectionInfoRef.current &&
+            <AddEventModal closeModal={ closeModal } selectionInfo={ selectionInfoRef.current } />
+        }
         </>
     )
 }

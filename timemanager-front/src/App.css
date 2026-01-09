@@ -1,3 +1,84 @@
 #calendar {
     height: 80%;
 }
+
+/* Overlay */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+/* Popup container */
+.modal {
+    background: #ffffff;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 15px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Title */
+.modal-title {
+    margin: 0 0 20px;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* Form */
+.event-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.9rem;
+}
+
+.form-group span {
+    color: #444;
+}
+
+.form-group input,
+.form-group select {
+    padding: 8px 10px;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+/* Actions */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.create-btn {
+    background: #3b82f6;
+    color: #ffffff;
+    border: none;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.create-btn:hover {
+    background: #2563eb;
+}
