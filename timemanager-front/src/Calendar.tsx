@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { createCalendar, destroyCalendar, TimeGrid, DayGrid, List, type Event } from '@event-calendar/core';
+import { createCalendar, destroyCalendar, TimeGrid, DayGrid, List, Interaction, type Event } from '@event-calendar/core';
 // Import CSS if your build tool supports it
 import '@event-calendar/core/index.css';
 
@@ -28,19 +28,20 @@ function Calendar() {
 
         if (!prev) return
 
-        let newStart = new Date(prev.start)
-        let newEnd = new Date(prev.end)
+        const newStart = new Date(prev.start)
+        const newEnd = new Date(prev.end)
         newStart.setDate(newStart.getDate() + 1)
         newEnd.setDate(newEnd.getDate() + 1)
 
-        eventsRef.current.push({
+        const newEvent = {
             ...prev,
             id: (parseInt(prev.id) + 1).toString(),
             start: newStart,
             end: newEnd
-        })
+        }
 
-        calendarRef.current.setOption("events", eventsRef.current)
+        eventsRef.current.push(newEvent)
+        calendarRef.current.addEvent(newEvent)
     }
 
     useEffect(() => {
@@ -48,11 +49,14 @@ function Calendar() {
             // HTML element the calendar will be mounted to
             calendarParentRef.current,
             // Array of plugins
-            [TimeGrid, DayGrid, List],
+            [TimeGrid, DayGrid, List, Interaction],
             // Options object
             {
                 view: 'timeGridWeek',
-                events: eventsRef.current
+                events: eventsRef.current,
+                pointer: true,
+                nowIndicator: true,
+                selectable: true
             }
         );
 
