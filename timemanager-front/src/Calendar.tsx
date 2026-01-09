@@ -23,6 +23,18 @@ function Calendar() {
         ]
     )
 
+    const dayStrings = [
+        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+    ]
+
+    const monthStrings = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dev"
+    ]
+
+    const dayHeaderFormatter = (date: Date) => {
+        return dayStrings[date.getDay()] + ", " + date.getDate() + "." + (date.getMonth() + 1) + "."
+    }
+
     const addEvent = () => {
         let prev = eventsRef.current.at(-1)
 
@@ -56,7 +68,9 @@ function Calendar() {
                 events: eventsRef.current,
                 pointer: true,
                 nowIndicator: true,
-                selectable: true
+                selectable: true,
+                dayHeaderFormat: dayHeaderFormatter,
+                firstDay: 1
             }
         );
 
