@@ -70,7 +70,9 @@ function Calendar() {
                 nowIndicator: true,
                 selectable: true,
                 dayHeaderFormat: dayHeaderFormatter,
-                firstDay: 1
+                firstDay: 1,
+                scrollTime: "06:00:00",
+                height: "100%"
             }
         );
 
