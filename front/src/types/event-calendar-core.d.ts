@@ -6,6 +6,27 @@ declare module '@event-calendar/core' {
         | { html: string }
         | { domNodes: Node[] }
 
+    export type FetchInfo = {
+        start: Date,
+        end: Date,
+        startStr: string,
+        endStr: string
+    }
+
+    export type CalendarEventSource =
+    | {
+        url: string,
+        method: string,
+        extraParams: any[]
+    }
+    | {
+        events: (
+            fetchInfo: FetchInfo,
+            successCallback: (events: CalendarEvent[]) => void,
+            failureCallback: (failureInfo: any) => void
+        ) => void
+    }
+
     export interface CalendarEvent {
         id: string,
         resourceIds: any[],

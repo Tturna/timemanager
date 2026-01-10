@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { createCalendar, destroyCalendar, TimeGrid, DayGrid, List, Interaction,
-    type SelectionInfo, type DisplayMode } from '@event-calendar/core';
+    type SelectionInfo, type DisplayMode, 
+    type FetchInfo,
+    type CalendarEvent} from '@event-calendar/core';
 // Import CSS if your build tool supports it
 import '@event-calendar/core/index.css';
 import AddEventModal from './AddEventModal';
@@ -49,6 +51,44 @@ function Calendar() {
         closeModal()
     }
 
+    const fetchEvents = (fetchInfo: FetchInfo, successCallback: (events: CalendarEvent[]) => void,
+        failureCallback: (failureInfo?: any) => void) =>
+    {
+        console.log("fetching events")
+
+        fetch("http://localhost:5167/api/calendar/events").then((response: Response) => {
+            response.json().then((events: {}[]) => {
+                console.log("event fetching successful")
+
+                successCallback(events.map((event: any) => {
+                    return {
+                        id: event.id,
+                        resourceIds: [],
+                        allDay: false,
+                        start: new Date(event.startDateTime),
+                        end: new Date(event.endDateTime),
+                        title: event.title,
+                        editable: true,
+                        startEditable: true,
+                        durationEditable: true,
+                        display: "auto" as DisplayMode,
+                        classNames: [],
+                        styles: [],
+                        extendedProps: []
+                    } as CalendarEvent
+                }))
+            }).catch((reason) => {
+                console.log("json failed")
+                console.log(reason)
+                failureCallback()
+            })
+        }).catch((reason) => {
+            console.log("fetch failed")
+            console.log(reason)
+            failureCallback()
+        })
+    }
+
     useEffect(() => {
         calendarRef.current = createCalendar(
             // HTML element the calendar will be mounted to
@@ -58,7 +98,7 @@ function Calendar() {
             // Options object
             {
                 view: 'timeGridWeek',
-                events: [],
+                eventSources: [{ events: fetchEvents }],
                 pointer: true,
                 nowIndicator: true,
                 selectable: true,

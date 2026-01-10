@@ -7,6 +7,17 @@ builder.Services.AddControllersWithViews();
 var connectionString = builder.Configuration.GetValue<string>("ConnectionString");
 builder.Services.AddNpgsql<TimeManagerDBContext>(connectionString);
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddCors(corsOptions =>
+    {
+        corsOptions.AddPolicy("devAllowAll", policyBuilder =>
+        {
+            policyBuilder.AllowAnyOrigin();
+        });
+    });
+}
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -15,6 +26,11 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("devAllowAll");
 }
 
 // app.UseAuthorization();
