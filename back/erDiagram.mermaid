@@ -1,0 +1,16 @@
+erDiagram
+    USER {
+        p_key id
+        string username
+        string password
+    }
+
+    CALENDAR_EVENT {
+        p_key id
+        f_key user_id
+        string title
+        datetime start_datetime
+        datetime end_datetime
+    }
+
+    USER ||--o{ CALENDAR_EVENT : ""
