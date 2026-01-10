@@ -1,4 +1,6 @@
 declare module '@event-calendar/core' {
+    export type DisplayMode = "auto" | "background" | "ghost" | "preview" | "pointer"
+
     export type Content =
         | string
         | { html: string }
@@ -14,7 +16,7 @@ declare module '@event-calendar/core' {
         editable?: bool,
         startEditable?: bool,
         durationEditable?: bool,
-        display: "auto" | "background" | "ghost" | "preview" | "pointer",
+        display: DisplayMode,
         backgroundColor?: string,
         textColor?: string,
         classNames: any[],

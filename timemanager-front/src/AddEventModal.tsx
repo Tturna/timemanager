@@ -1,10 +1,39 @@
-import type { SelectionInfo } from "@event-calendar/core"
+import type { SelectionInfo, View } from "@event-calendar/core"
 import { useRef, useEffect, useMemo } from "react"
 import type { JSX } from "react/jsx-runtime"
 
-function AddEventModal({ closeModal, selectionInfo }:
-                       { closeModal: () => void, selectionInfo: SelectionInfo }) {
+function AddEventModal({ addEvent, closeModal, selectionInfo, calendar }:
+{
+    addEvent: (eventType: string, start: Date, end: Date) => void,
+    closeModal: () => void,
+    selectionInfo: SelectionInfo | null, calendar: any
+}) {
     const modalRef = useRef<HTMLDivElement | null>(null)
+
+    const getDefaultTimeIdentifier = (date: Date) => {
+        const hour = date.getHours()
+        const minute = Math.floor(date.getMinutes() / 15) * 15
+        return (hour <= 9 ? "0" + hour : hour).toString() + ":"
+            + (minute <= 9 ? "0" + minute : minute).toString()
+    }
+
+    let startDateTime: Date
+    let endDateTime: Date
+
+    if (!selectionInfo) {
+        const calendarView: View = calendar.getView()
+        startDateTime = calendarView.currentStart
+        startDateTime.setHours(8)
+
+        endDateTime = new Date(startDateTime)
+        endDateTime.setHours(endDateTime.getHours() + 1)
+    }
+    else {
+        startDateTime = selectionInfo.start
+        endDateTime = selectionInfo.end
+
+        startDateTime.setMinutes(Math.floor(startDateTime.getMinutes() / 15) * 15)
+    }
 
     const timeOptionElements = useMemo(() => {
         let hours = 0
@@ -12,10 +41,14 @@ function AddEventModal({ closeModal, selectionInfo }:
         let options: JSX.Element[] = []
 
         while (hours < 24) {
+            const timeOptionValue = new Date(startDateTime)
+            timeOptionValue.setHours(hours)
+            timeOptionValue.setMinutes(minutes)
+
             const timeOptionString = (hours <= 9 ? "0" + hours : hours).toString() + ":"
             + (minutes <= 9 ? "0" + minutes : minutes).toString()
 
-            options.push(<option value={timeOptionString} key={timeOptionString}>{timeOptionString}</option>)
+            options.push(<option value={timeOptionValue.toISOString()} key={timeOptionString}>{timeOptionString}</option>)
 
             minutes += 15
 
@@ -26,29 +59,27 @@ function AddEventModal({ closeModal, selectionInfo }:
         }
 
         return options
-    }, [])
+    }, [selectionInfo])
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault()
         const data = new FormData(event.currentTarget)
-        console.log("submitting:")
-        console.log(data)
-        console.log(data.get("eventType"))
-        console.log(data.get("startDate"))
-        console.log(data.get("startTime"))
-        console.log(data.get("endDate"))
-        console.log(data.get("endTime"))
-        closeModal()
-    }
+        const eventType = data.get("eventType") as string
+        const startDateString = data.get("startDate") as string
+        const endDateString = data.get("startDate") as string
+        const startDateTimeString = data.get("startTime") as string
+        const endDateTimeString = data.get("endTime") as string
 
-    const getDefaultTimeValue = (date: Date) => {
-        const hour = date.getHours()
-        const minute = Math.floor(date.getMinutes() / 15) * 15
-        return (hour <= 9 ? "0" + hour : hour).toString() + ":"
-            + (minute <= 9 ? "0" + minute : minute).toString()
-    }
+        const startDate = new Date(startDateString)
+        const endDate = new Date(endDateString)
+        const startDateTime = new Date(startDateTimeString)
+        const endDateTime = new Date(endDateTimeString)
+        startDateTime.setMonth(startDate.getMonth())
+        startDateTime.setDate(startDate.getDate())
+        endDateTime.setMonth(endDate.getMonth())
+        endDateTime.setDate(endDate.getDate())
 
-    const getDefaultDateValue = (date: Date) => {
-        return date.toISOString().slice(0, 10)
+        addEvent(eventType, startDateTime, endDateTime)
     }
 
     useEffect(() => {
@@ -92,8 +123,8 @@ function AddEventModal({ closeModal, selectionInfo }:
                     <label className="form-group">
                         <span>Start Time</span>
                         <div>
-                            <input type="date" name="startDate" defaultValue={getDefaultDateValue(selectionInfo.start)} />
-                            <select name="startTime" defaultValue={getDefaultTimeValue(selectionInfo.start)}>
+                            <input type="date" name="startDate" defaultValue={startDateTime.toISOString().slice(0, 10)} />
+                            <select name="startTime" defaultValue={startDateTime.toISOString()}>
                             { timeOptionElements }
                             </select>
                         </div>
@@ -102,8 +133,8 @@ function AddEventModal({ closeModal, selectionInfo }:
                     <label className="form-group">
                         <span>End Time</span>
                         <div>
-                            <input type="date" name="endDate" defaultValue={getDefaultDateValue(selectionInfo.end)} />
-                            <select name="endTime" defaultValue={getDefaultTimeValue(selectionInfo.end)}>
+                            <input type="date" name="endDate" defaultValue={endDateTime.toISOString().slice(0, 10)} />
+                            <select name="endTime" defaultValue={endDateTime.toISOString()}>
                             { timeOptionElements }
                             </select>
                         </div>
