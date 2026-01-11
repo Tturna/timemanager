@@ -14,7 +14,7 @@ public class CalendarController(TimeManagerDBContext dbContext) : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult AddEvent([FromForm] NewEventDto newEventDto)
+    public IActionResult AddEvent([FromBody] NewEventDto newEventDto)
     {
         if (!ModelState.IsValid)
         {
