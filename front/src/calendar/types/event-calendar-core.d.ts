@@ -73,10 +73,16 @@ declare module '@event-calendar/core' {
         resource?: Resource
     }
 
-    export function createCalendar(...args: any[]): any;
-    export function destroyCalendar(...args: any[]): void;
+    export function createCalendar(...args: any[]): Calendar;
+    export function destroyCalendar(calendar: Calendar): void;
     export const TimeGrid: any;
     export const DayGrid: any;
     export const List: any;
     export const Interaction: any;
+
+    export interface Calendar {
+        addEvent: (event: CalendarEvent) => void,
+        unselect: () => void,
+        getView: () => View
+    }
 }

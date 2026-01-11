@@ -1,27 +1,24 @@
-import type { SelectionInfo, View } from "@event-calendar/core"
-import { useRef, useEffect, useMemo } from "react"
+import type { Calendar, SelectionInfo } from "@event-calendar/core"
+import { useRef, useEffect, useMemo, type RefObject } from "react"
 import type { JSX } from "react/jsx-runtime"
+import useCalendarEvents from "./useCalendarEvents"
 
-function AddEventModal({ addEvent, closeModal, selectionInfo, calendar }:
+function AddEventModal({ closeModal, selectionInfo, calendarRef }:
 {
-    addEvent: (eventType: string, start: Date, end: Date) => void,
     closeModal: () => void,
-    selectionInfo: SelectionInfo | null, calendar: any
-}) {
-    const modalRef = useRef<HTMLDivElement | null>(null)
+    selectionInfo: SelectionInfo | null, calendarRef: RefObject<Calendar | null>
+})
+{
+    if (!calendarRef.current) return;
 
-    const getDefaultTimeIdentifier = (date: Date) => {
-        const hour = date.getHours()
-        const minute = Math.floor(date.getMinutes() / 15) * 15
-        return (hour <= 9 ? "0" + hour : hour).toString() + ":"
-            + (minute <= 9 ? "0" + minute : minute).toString()
-    }
+    const modalRef = useRef<HTMLDivElement | null>(null)
+    const { addEvent } = useCalendarEvents()
 
     let startDateTime: Date
     let endDateTime: Date
 
     if (!selectionInfo) {
-        const calendarView: View = calendar.getView()
+        const calendarView = calendarRef.current.getView()
         startDateTime = calendarView.currentStart
         startDateTime.setHours(8)
 
@@ -79,7 +76,8 @@ function AddEventModal({ addEvent, closeModal, selectionInfo, calendar }:
         endDateTime.setMonth(endDate.getMonth())
         endDateTime.setDate(endDate.getDate())
 
-        addEvent(eventType, startDateTime, endDateTime)
+        addEvent(calendarRef, eventType, startDateTime, endDateTime)
+        closeModal()
     }
 
     useEffect(() => {
