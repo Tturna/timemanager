@@ -31,7 +31,7 @@ function Calendar() {
 
     const addEvent = (eventType: string, start: Date, end: Date) => {
         const newEvent = {
-            id: "1",
+            id: start.toISOString() + end.toISOString(),
             resourceIds: [],
             allDay: false,
             start,
@@ -51,7 +51,7 @@ function Calendar() {
         closeModal()
     }
 
-    const fetchEvents = (fetchInfo: FetchInfo, successCallback: (events: CalendarEvent[]) => void,
+    const fetchEvents = (_: FetchInfo, successCallback: (events: CalendarEvent[]) => void,
         failureCallback: (failureInfo?: any) => void) =>
     {
         console.log("fetching events")
