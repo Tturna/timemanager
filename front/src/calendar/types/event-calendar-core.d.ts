@@ -73,6 +73,17 @@ declare module '@event-calendar/core' {
         resource?: Resource
     }
 
+    export interface EventDropInfo {
+        event: CalendarEvent,
+        oldEvent: CalendarEvent,
+        oldResource: Resource,
+        newResource: Resource,
+        delta: any, // duration
+        revert: () => void,
+        jsEvent: Event,
+        view: View
+    }
+
     export function createCalendar(...args: any[]): Calendar;
     export function destroyCalendar(calendar: Calendar): void;
     export const TimeGrid: any;

@@ -3,7 +3,12 @@ import type { RefObject } from "react"
 import type { CalendarEventModel } from "../types/api_schema"
 import type { AddEventFn, FetchEventsFn } from "./types/calendar_helper_types"
 
-function useCalendarEvents() : { fetchEvents: FetchEventsFn, addEvent: AddEventFn } {
+function useCalendarEvents() :
+{
+    fetchEvents: FetchEventsFn,
+    addEvent: AddEventFn,
+    syncEventToBackend: (event: CalendarEvent) => Promise<boolean>
+} {
     const addEvent: AddEventFn = (calendarRef: RefObject<Calendar | null>, title: string, start: Date, end: Date) => {
         if (!calendarRef.current) return
 
@@ -48,6 +53,33 @@ function useCalendarEvents() : { fetchEvents: FetchEventsFn, addEvent: AddEventF
         calendarRef.current.unselect()
     }
 
+    const syncEventToBackend = async (event: CalendarEvent) => {
+        const options: RequestInit = {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                title: event.title,
+                startDateTime: event.start.toISOString(),
+                endDateTime: event.end.toISOString()
+            })
+        }
+
+        console.log("trying to edit event...")
+        const result = fetch(`http://localhost:5167/api/calendar/editevent/${event.id}`, options)
+        .then(_ => {
+            console.log("event updated")
+            return true
+        })
+        .catch(reason => {
+            console.log(reason)
+            return false
+        })
+
+        return result
+    }
+
     const fetchEvents: FetchEventsFn = (_, successCallback: (events: CalendarEvent[]) => void,
         failureCallback: (failureInfo?: any) => void) =>
     {
@@ -79,7 +111,7 @@ function useCalendarEvents() : { fetchEvents: FetchEventsFn, addEvent: AddEventF
             }))
     }
 
-    return { fetchEvents, addEvent }
+    return { fetchEvents, addEvent, syncEventToBackend }
 }
 
 export default useCalendarEvents

@@ -1,6 +1,5 @@
 import { createCalendar, destroyCalendar, DayGrid, Interaction, List, TimeGrid,
-    type Calendar, 
-    type SelectionInfo} from "@event-calendar/core";
+    type Calendar, type SelectionInfo, type EventDropInfo} from "@event-calendar/core";
 import { useEffect, useRef, type RefObject } from "react";
 import useCalendarEvents from "./useCalendarEvents";
 
@@ -9,7 +8,7 @@ function useCalendar(calendarParentRef: RefObject<HTMLElement | null>, openModal
 {
     const calendarRef = useRef<Calendar | null>(null)
     const selectionInfoRef = useRef<SelectionInfo | null>(null)
-    const { fetchEvents } = useCalendarEvents()
+    const { fetchEvents, syncEventToBackend } = useCalendarEvents()
 
     const dayStrings = [
         "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
@@ -25,6 +24,19 @@ function useCalendar(calendarParentRef: RefObject<HTMLElement | null>, openModal
         openModal()
     }
 
+    const handleEventDrop = (info: EventDropInfo) => {
+        syncEventToBackend(info.event)
+        .then(syncSucceeded => {
+            if (!syncSucceeded) {
+                info.revert()
+            }
+        })
+        .catch((reason: any) => {
+            console.log(reason)
+            info.revert()
+        })
+    }
+
     useEffect(() => {
         calendarRef.current = createCalendar(
             // HTML element the calendar will be mounted to
@@ -38,12 +50,13 @@ function useCalendar(calendarParentRef: RefObject<HTMLElement | null>, openModal
                 pointer: true,
                 nowIndicator: true,
                 selectable: true,
+                unselectAuto: false,
                 dayHeaderFormat: dayHeaderFormatter,
                 firstDay: 1,
                 scrollTime: "06:00:00",
                 height: "100%",
                 select: handleSelect,
-                unselectAuto: false
+                eventDrop: handleEventDrop
             }
         );
 
