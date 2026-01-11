@@ -14,7 +14,7 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
     if (!calendarRef.current) return;
 
     const modalRef = useRef<HTMLDivElement | null>(null)
-    const { addEvent, syncEventToBackend } = useCalendarEvents()
+    const { addEvent, syncEventToBackend, deleteEvent } = useCalendarEvents()
 
     let title: string
 
@@ -117,6 +117,29 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
         closeModal()
     }
 
+    const handleDelete = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        if (!eventToEdit) return
+
+        event.preventDefault()
+
+        if (!window.confirm("Are you sure you want to delete this event?")) return
+
+        deleteEvent(eventToEdit.id)
+        .then(deleteSucceeded => {
+            if (deleteSucceeded) {
+                calendarRef.current?.refetchEvents()
+            }
+            else {
+                console.log("Failed to delete event")
+            }
+        })
+        .catch(reason => {
+            console.log(reason)
+        })
+
+        closeModal()
+    }
+
     useEffect(() => {
         const handler = (event: MouseEvent) => {
             if (!modalRef.current) {
@@ -143,7 +166,11 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
     return (
         <div className="modal-overlay">
             <div className="modal" ref={modalRef}>
-                <h2 className="modal-title">Create Event</h2>
+            {
+                eventToEdit
+                ? <h2 className="modal-title">Edit Event</h2>
+                : <h2 className="modal-title">Create Event</h2>
+            }
 
                 <form className="event-form" onSubmit={handleSubmit}>
                     <label className="form-group">
@@ -178,7 +205,12 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
                     <div className="form-actions">
                     {
                         eventToEdit
-                        ? <button type="submit" className="create-btn">Save</button>
+                        ? (
+                            <div className="flex-row">
+                                <button type="submit" className="delete-btn" onClick={handleDelete}>Delete</button>
+                                <button type="submit" className="create-btn">Save</button>
+                            </div>
+                        )
                         : <button type="submit" className="create-btn">Create</button>
                     }
                     </div>

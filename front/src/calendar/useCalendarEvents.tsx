@@ -7,7 +7,8 @@ function useCalendarEvents() :
 {
     fetchEvents: FetchEventsFn,
     addEvent: AddEventFn,
-    syncEventToBackend: (event: CalendarEvent) => Promise<boolean>
+    syncEventToBackend: (event: CalendarEvent) => Promise<boolean>,
+    deleteEvent: (id: string) => Promise<boolean>
 } {
     const addEvent: AddEventFn = (calendarRef: RefObject<Calendar | null>, title: string, start: Date, end: Date) => {
         if (!calendarRef.current) return
@@ -53,7 +54,7 @@ function useCalendarEvents() :
         calendarRef.current.unselect()
     }
 
-    const syncEventToBackend = async (event: CalendarEvent) => {
+    const syncEventToBackend = (event: CalendarEvent) => {
         const options: RequestInit = {
             method: "PUT",
             headers: {
@@ -109,7 +110,22 @@ function useCalendarEvents() :
             }))
     }
 
-    return { fetchEvents, addEvent, syncEventToBackend }
+    const deleteEvent = (id: string) => {
+        const options: RequestInit = {
+            method: "DELETE"
+        }
+
+        const result = fetch(`http://localhost:5167/api/calendar/deleteevent/${id}`, options)
+        .then(_ => true)
+        .catch(reason => {
+            console.log(reason)
+            return false
+        })
+
+        return result
+    }
+
+    return { fetchEvents, addEvent, syncEventToBackend, deleteEvent }
 }
 
 export default useCalendarEvents
