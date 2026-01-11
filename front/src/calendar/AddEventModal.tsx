@@ -3,50 +3,88 @@ import { useRef, useEffect, useMemo, type RefObject } from "react"
 import type { JSX } from "react/jsx-runtime"
 import useCalendarEvents from "./useCalendarEvents"
 
+function getInitialEventData(calendar: Calendar, eventToEdit: CalendarEvent | null, selectionInfo: SelectionInfo | null) {
+    let initialTitle: string
+
+    if (eventToEdit) {
+        initialTitle = (eventToEdit.title as string).toLowerCase()
+    }
+    else {
+        // Default title option
+        initialTitle = "lecture"
+    }
+
+    let initialStartDateTime: Date
+    let initialEndDateTime: Date
+
+    if (eventToEdit) {
+        initialStartDateTime = new Date(eventToEdit.start)
+        initialEndDateTime = new Date(eventToEdit.end)
+    }
+    else if (selectionInfo) {
+        initialStartDateTime = new Date(selectionInfo.start)
+        initialEndDateTime = new Date(selectionInfo.end)
+
+        initialStartDateTime.setMinutes(Math.floor(initialStartDateTime.getMinutes() / 15) * 15)
+    }
+    else {
+        const calendarView = calendar.getView()
+        initialStartDateTime = new Date(calendarView.currentStart)
+        initialStartDateTime.setHours(8)
+
+        initialEndDateTime = new Date(initialStartDateTime)
+        initialEndDateTime.setHours(initialEndDateTime.getHours() + 1)
+    }
+
+    return { initialTitle, initialStartDateTime, initialEndDateTime }
+}
+
+function getEventDataFromFormData(data: FormData) {
+    const title = data.get("eventType") as string
+    const startDateString = data.get("startDate") as string
+    const endDateString = data.get("endDate") as string
+    const startDateTimeString = data.get("startTime") as string
+    const endDateTimeString = data.get("endTime") as string
+
+    if (typeof(title) !== "string" ||
+        typeof(startDateString) !== "string" ||
+        typeof(endDateString) !== "string" ||
+        typeof(startDateTimeString) !== "string" ||
+        typeof(endDateTimeString) !== "string"
+    ) {
+        throw new Error("Invalid form data!")
+    }
+
+    const startDate = new Date(startDateString)
+    const endDate = new Date(endDateString)
+    const startDateTime = new Date(startDateTimeString)
+    const endDateTime = new Date(endDateTimeString)
+    startDateTime.setMonth(startDate.getMonth())
+    startDateTime.setDate(startDate.getDate())
+    endDateTime.setMonth(endDate.getMonth())
+    endDateTime.setDate(endDate.getDate())
+
+    return { title, startDateTime, endDateTime }
+}
+
 function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
 {
     closeModal: () => void,
-    calendarRef: RefObject<Calendar | null>,
+    calendarRef: RefObject<Calendar>,
     selectionInfo: SelectionInfo | null,
     eventToEdit: CalendarEvent | null
 })
 {
-    if (!calendarRef.current) return;
+    const calendar = calendarRef?.current
+
+    if (!calendar) {
+        throw new Error("AddEventModal rendered without valid calendar reference!")
+    }
 
     const modalRef = useRef<HTMLDivElement | null>(null)
     const { addEvent, syncEventToBackend, deleteEvent } = useCalendarEvents()
 
-    let title: string
-
-    if (eventToEdit) {
-        title = (eventToEdit.title as string).toLowerCase()
-    }
-    else {
-        // Default title option
-        title = "lecture"
-    }
-
-    let startDateTime: Date
-    let endDateTime: Date
-
-    if (eventToEdit) {
-        startDateTime = eventToEdit.start
-        endDateTime = eventToEdit.end
-    }
-    else if (selectionInfo) {
-        startDateTime = selectionInfo.start
-        endDateTime = selectionInfo.end
-
-        startDateTime.setMinutes(Math.floor(startDateTime.getMinutes() / 15) * 15)
-    }
-    else {
-        const calendarView = calendarRef.current.getView()
-        startDateTime = calendarView.currentStart
-        startDateTime.setHours(8)
-
-        endDateTime = new Date(startDateTime)
-        endDateTime.setHours(endDateTime.getHours() + 1)
-    }
+    const { initialTitle, initialStartDateTime, initialEndDateTime } = getInitialEventData(calendar, eventToEdit, selectionInfo)
 
     const timeOptionElements = useMemo(() => {
         let hours = 0
@@ -54,7 +92,7 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
         let options: JSX.Element[] = []
 
         while (hours < 24) {
-            const timeOptionValue = new Date(startDateTime)
+            const timeOptionValue = new Date(initialStartDateTime)
             timeOptionValue.setHours(hours)
             timeOptionValue.setMinutes(minutes)
 
@@ -72,35 +110,25 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
         }
 
         return options
-    }, [selectionInfo])
+    }, [initialStartDateTime])
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const data = new FormData(event.currentTarget)
-        const eventType = data.get("eventType") as string
-        const startDateString = data.get("startDate") as string
-        const endDateString = data.get("startDate") as string
-        const startDateTimeString = data.get("startTime") as string
-        const endDateTimeString = data.get("endTime") as string
-
-        const startDate = new Date(startDateString)
-        const endDate = new Date(endDateString)
-        const startDateTime = new Date(startDateTimeString)
-        const endDateTime = new Date(endDateTimeString)
-        startDateTime.setMonth(startDate.getMonth())
-        startDateTime.setDate(startDate.getDate())
-        endDateTime.setMonth(endDate.getMonth())
-        endDateTime.setDate(endDate.getDate())
+        const { title, startDateTime, endDateTime } = getEventDataFromFormData(data)
 
         if (eventToEdit) {
-            eventToEdit.title = eventType
-            eventToEdit.start = startDateTime
-            eventToEdit.end = endDateTime
+            const editedEvent = {
+                ...eventToEdit,
+                title,
+                start: startDateTime,
+                end: endDateTime
+            }
 
-            syncEventToBackend(eventToEdit)
+            syncEventToBackend(editedEvent)
             .then(syncSucceeded => {
                 if (syncSucceeded) {
-                    calendarRef.current?.refetchEvents()
+                    calendar.refetchEvents()
                 }
                 else {
                     console.log("Failed to edit event")
@@ -111,7 +139,7 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
             })
         }
         else {
-            addEvent(calendarRef, eventType, startDateTime, endDateTime)
+            addEvent(calendarRef, title, startDateTime, endDateTime)
         }
 
         closeModal()
@@ -127,7 +155,7 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
         deleteEvent(eventToEdit.id)
         .then(deleteSucceeded => {
             if (deleteSucceeded) {
-                calendarRef.current?.refetchEvents()
+                calendar.refetchEvents()
             }
             else {
                 console.log("Failed to delete event")
@@ -152,7 +180,7 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
             }
 
             closeModal()
-            calendarRef.current?.unselect()
+            calendar.unselect()
         }
 
         // capture = true
@@ -176,7 +204,7 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
                 <form className="event-form" onSubmit={handleSubmit}>
                     <label className="form-group">
                         <span>Event Type</span>
-                        <select name="eventType" defaultValue={title}>
+                        <select name="eventType" defaultValue={initialTitle}>
                             <option value="lecture">Lecture</option>
                             <option value="meeting">Meeting</option>
                             <option value="whatever">Whatever</option>
@@ -186,8 +214,8 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
                     <label className="form-group">
                         <span>Start Time</span>
                         <div>
-                            <input type="date" name="startDate" defaultValue={startDateTime.toISOString().slice(0, 10)} />
-                            <select name="startTime" defaultValue={startDateTime.toISOString()}>
+                            <input type="date" name="startDate" defaultValue={initialStartDateTime.toISOString().slice(0, 10)} />
+                            <select name="startTime" defaultValue={initialStartDateTime.toISOString()}>
                             { timeOptionElements }
                             </select>
                         </div>
@@ -196,8 +224,8 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
                     <label className="form-group">
                         <span>End Time</span>
                         <div>
-                            <input type="date" name="endDate" defaultValue={endDateTime.toISOString().slice(0, 10)} />
-                            <select name="endTime" defaultValue={endDateTime.toISOString()}>
+                            <input type="date" name="endDate" defaultValue={initialEndDateTime.toISOString().slice(0, 10)} />
+                            <select name="endTime" defaultValue={initialEndDateTime.toISOString()}>
                             { timeOptionElements }
                             </select>
                         </div>

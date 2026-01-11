@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, type RefObject } from 'react';
+import { type Calendar } from '@event-calendar/core'
 
 // Import CSS if your build tool supports it
 import '@event-calendar/core/index.css';
@@ -36,7 +37,7 @@ function Calendar() {
             <AddEventModal
                 closeModal={ closeModal }
                 selectionInfo={ selectionInfoRef.current } // may be null
-                calendarRef={ calendarRef }
+                calendarRef={ calendarRef as RefObject<Calendar> }
                 eventToEdit={ eventToEditRef.current } // may be null
             />
         }
