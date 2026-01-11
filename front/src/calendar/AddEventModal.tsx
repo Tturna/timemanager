@@ -152,6 +152,7 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
             }
 
             closeModal()
+            calendarRef.current?.unselect()
         }
 
         // capture = true
