@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
 var connectionString = builder.Configuration.GetValue<string>("ConnectionString");
 builder.Services.AddNpgsql<TimeManagerDBContext>(connectionString);
 
@@ -17,6 +17,8 @@ if (builder.Environment.IsDevelopment())
         });
     });
 }
+
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
@@ -35,9 +37,9 @@ if (app.Environment.IsDevelopment())
 
 // app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "api/{controller}/{action}/{id?}");
+// Map attribute-routed controllers
+app.MapControllers();
+app.MapOpenApi();
 
 using (var scope = app.Services.CreateScope())
 {

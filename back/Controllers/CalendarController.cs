@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using back.Models;
 
-public class CalendarController(TimeManagerDBContext dbContext) : Controller
+[ApiController]
+[Route("api/[controller]/[action]")]
+public class CalendarController(TimeManagerDBContext dbContext) : ControllerBase
 {
     [HttpGet]
-    public IActionResult Events()
+    public ActionResult<IEnumerable<CalendarEventModel>> Events()
     {
         var events = dbContext.CalendarEvents.ToArray();
 
@@ -43,7 +45,7 @@ public class CalendarController(TimeManagerDBContext dbContext) : Controller
         return new CreatedResult();
     }
 
-    [HttpPut]
+    [HttpPut("{id}")]
     public IActionResult EditEvent([FromBody] NewEventDto newEventDto, Guid id)
     {
         if (!ModelState.IsValid)
@@ -82,7 +84,7 @@ public class CalendarController(TimeManagerDBContext dbContext) : Controller
         return new OkResult();
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public IActionResult DeleteEvent(Guid id)
     {
         var eventToDelete = dbContext.CalendarEvents.Find(id);
