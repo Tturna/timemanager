@@ -14,7 +14,7 @@ public class CalendarController(TimeManagerDBContext dbContext) : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult AddEvent([FromBody] NewEventDto newEventDto)
+    public ActionResult<CalendarEventModel> AddEvent([FromBody] NewEventDto newEventDto)
     {
         if (!ModelState.IsValid)
         {
@@ -42,7 +42,7 @@ public class CalendarController(TimeManagerDBContext dbContext) : ControllerBase
             throw;
         }
 
-        return new CreatedResult();
+        return new JsonResult(newEvent);
     }
 
     [HttpPut("{id}")]

@@ -59,13 +59,9 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/x-www-form-urlencoded": {
-                        Title?: string;
-                        /** Format: date-time */
-                        StartDateTime?: string;
-                        /** Format: date-time */
-                        EndDateTime?: string;
-                    };
+                    "application/json": components["schemas"]["NewEventDto"];
+                    "text/json": components["schemas"]["NewEventDto"];
+                    "application/*+json": components["schemas"]["NewEventDto"];
                 };
             };
             responses: {
@@ -74,7 +70,11 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "text/plain": components["schemas"]["CalendarEventModel"];
+                        "application/json": components["schemas"]["CalendarEventModel"];
+                        "text/json": components["schemas"]["CalendarEventModel"];
+                    };
                 };
             };
         };

@@ -26,11 +26,12 @@ function useCalendarEvents() :
         }
 
         fetch("http://localhost:5167/api/calendar/addevent", options)
-        .then(_ => {
+        .then((response: Response) => response.json())
+        .then((createdEvent: CalendarEventModel) => {
             if (!calendarRef.current) return
 
             const newEvent = {
-                id: start.toISOString() + end.toISOString(),
+                id: createdEvent.id,
                 resourceIds: [],
                 allDay: false,
                 start,
