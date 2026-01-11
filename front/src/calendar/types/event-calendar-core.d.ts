@@ -84,6 +84,16 @@ declare module '@event-calendar/core' {
         view: View
     }
 
+    export interface EventResizeInfo {
+        event: CalendarEvent,
+        oldEvent: CalendarEvent,
+        startDelta: any, // duration
+        endDelta: any, // duration
+        revert: () => void,
+        jsEvent: Event,
+        view: View
+    }
+
     export function createCalendar(...args: any[]): Calendar;
     export function destroyCalendar(calendar: Calendar): void;
     export const TimeGrid: any;

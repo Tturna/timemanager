@@ -66,10 +66,8 @@ function useCalendarEvents() :
             })
         }
 
-        console.log("trying to edit event...")
         const result = fetch(`http://localhost:5167/api/calendar/editevent/${event.id}`, options)
         .then(_ => {
-            console.log("event updated")
             return true
         })
         .catch(reason => {

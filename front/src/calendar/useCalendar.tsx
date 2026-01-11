@@ -1,5 +1,6 @@
 import { createCalendar, destroyCalendar, DayGrid, Interaction, List, TimeGrid,
-    type Calendar, type SelectionInfo, type EventDropInfo} from "@event-calendar/core";
+    type Calendar, type SelectionInfo, type EventDropInfo,
+    type EventResizeInfo} from "@event-calendar/core";
 import { useEffect, useRef, type RefObject } from "react";
 import useCalendarEvents from "./useCalendarEvents";
 
@@ -37,6 +38,19 @@ function useCalendar(calendarParentRef: RefObject<HTMLElement | null>, openModal
         })
     }
 
+    const handleEventResize = (info: EventResizeInfo) => {
+        syncEventToBackend(info.event)
+        .then(syncSucceeded => {
+            if (!syncSucceeded) {
+                info.revert()
+            }
+        })
+        .catch((reason: any) => {
+            console.log(reason)
+            info.revert()
+        })
+    }
+
     useEffect(() => {
         calendarRef.current = createCalendar(
             // HTML element the calendar will be mounted to
@@ -56,7 +70,8 @@ function useCalendar(calendarParentRef: RefObject<HTMLElement | null>, openModal
                 scrollTime: "06:00:00",
                 height: "100%",
                 select: handleSelect,
-                eventDrop: handleEventDrop
+                eventDrop: handleEventDrop,
+                eventResize: handleEventResize
             }
         );
 
