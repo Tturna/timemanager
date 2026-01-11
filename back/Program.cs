@@ -14,6 +14,7 @@ if (builder.Environment.IsDevelopment())
         corsOptions.AddPolicy("devAllowAll", policyBuilder =>
         {
             policyBuilder.AllowAnyOrigin();
+            policyBuilder.AllowAnyHeader();
         });
     });
 }
