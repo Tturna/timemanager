@@ -73,6 +73,13 @@ declare module '@event-calendar/core' {
         resource?: Resource
     }
 
+    export interface EventClickInfo {
+        el: HTMLElement,
+        event: CalendarEvent,
+        jsEvent: Event,
+        view: View
+    }
+
     export interface EventDropInfo {
         event: CalendarEvent,
         oldEvent: CalendarEvent,
@@ -104,6 +111,7 @@ declare module '@event-calendar/core' {
     export interface Calendar {
         addEvent: (event: CalendarEvent) => void,
         unselect: () => void,
-        getView: () => View
+        getView: () => View,
+        refetchEvents: () => Calendar
     }
 }

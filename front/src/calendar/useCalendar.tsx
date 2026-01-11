@@ -1,10 +1,12 @@
 import { createCalendar, destroyCalendar, DayGrid, Interaction, List, TimeGrid,
     type Calendar, type SelectionInfo, type EventDropInfo,
-    type EventResizeInfo} from "@event-calendar/core";
+    type EventResizeInfo,
+    type EventClickInfo,
+    type CalendarEvent} from "@event-calendar/core";
 import { useEffect, useRef, type RefObject } from "react";
 import useCalendarEvents from "./useCalendarEvents";
 
-function useCalendar(calendarParentRef: RefObject<HTMLElement | null>, openModal: () => void)
+function useCalendar(calendarParentRef: RefObject<HTMLElement | null>, openModal: (eventToEdit?: CalendarEvent) => void)
     : { calendarRef: RefObject<Calendar | null>, selectionInfoRef: RefObject<SelectionInfo | null> }
 {
     const calendarRef = useRef<Calendar | null>(null)
@@ -51,6 +53,10 @@ function useCalendar(calendarParentRef: RefObject<HTMLElement | null>, openModal
         })
     }
 
+    const handleEventClick = (info: EventClickInfo) => {
+        openModal(info.event)
+    }
+
     useEffect(() => {
         calendarRef.current = createCalendar(
             // HTML element the calendar will be mounted to
@@ -71,7 +77,8 @@ function useCalendar(calendarParentRef: RefObject<HTMLElement | null>, openModal
                 height: "100%",
                 select: handleSelect,
                 eventDrop: handleEventDrop,
-                eventResize: handleEventResize
+                eventResize: handleEventResize,
+                eventClick: handleEventClick
             }
         );
 

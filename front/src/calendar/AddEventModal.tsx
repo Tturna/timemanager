@@ -1,35 +1,51 @@
-import type { Calendar, SelectionInfo } from "@event-calendar/core"
+import type { Calendar, CalendarEvent, SelectionInfo } from "@event-calendar/core"
 import { useRef, useEffect, useMemo, type RefObject } from "react"
 import type { JSX } from "react/jsx-runtime"
 import useCalendarEvents from "./useCalendarEvents"
 
-function AddEventModal({ closeModal, selectionInfo, calendarRef }:
+function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
 {
     closeModal: () => void,
-    selectionInfo: SelectionInfo | null, calendarRef: RefObject<Calendar | null>
+    calendarRef: RefObject<Calendar | null>,
+    selectionInfo: SelectionInfo | null,
+    eventToEdit: CalendarEvent | null
 })
 {
     if (!calendarRef.current) return;
 
     const modalRef = useRef<HTMLDivElement | null>(null)
-    const { addEvent } = useCalendarEvents()
+    const { addEvent, syncEventToBackend } = useCalendarEvents()
+
+    let title: string
+
+    if (eventToEdit) {
+        title = (eventToEdit.title as string).toLowerCase()
+    }
+    else {
+        // Default title option
+        title = "lecture"
+    }
 
     let startDateTime: Date
     let endDateTime: Date
 
-    if (!selectionInfo) {
+    if (eventToEdit) {
+        startDateTime = eventToEdit.start
+        endDateTime = eventToEdit.end
+    }
+    else if (selectionInfo) {
+        startDateTime = selectionInfo.start
+        endDateTime = selectionInfo.end
+
+        startDateTime.setMinutes(Math.floor(startDateTime.getMinutes() / 15) * 15)
+    }
+    else {
         const calendarView = calendarRef.current.getView()
         startDateTime = calendarView.currentStart
         startDateTime.setHours(8)
 
         endDateTime = new Date(startDateTime)
         endDateTime.setHours(endDateTime.getHours() + 1)
-    }
-    else {
-        startDateTime = selectionInfo.start
-        endDateTime = selectionInfo.end
-
-        startDateTime.setMinutes(Math.floor(startDateTime.getMinutes() / 15) * 15)
     }
 
     const timeOptionElements = useMemo(() => {
@@ -76,7 +92,28 @@ function AddEventModal({ closeModal, selectionInfo, calendarRef }:
         endDateTime.setMonth(endDate.getMonth())
         endDateTime.setDate(endDate.getDate())
 
-        addEvent(calendarRef, eventType, startDateTime, endDateTime)
+        if (eventToEdit) {
+            eventToEdit.title = eventType
+            eventToEdit.start = startDateTime
+            eventToEdit.end = endDateTime
+
+            syncEventToBackend(eventToEdit)
+            .then(syncSucceeded => {
+                if (syncSucceeded) {
+                    calendarRef.current?.refetchEvents()
+                }
+                else {
+                    console.log("Failed to edit event")
+                }
+            })
+            .catch((reason: any) => {
+                console.log(reason)
+            })
+        }
+        else {
+            addEvent(calendarRef, eventType, startDateTime, endDateTime)
+        }
+
         closeModal()
     }
 
@@ -111,10 +148,10 @@ function AddEventModal({ closeModal, selectionInfo, calendarRef }:
                 <form className="event-form" onSubmit={handleSubmit}>
                     <label className="form-group">
                         <span>Event Type</span>
-                        <select name="eventType">
+                        <select name="eventType" defaultValue={title}>
+                            <option value="lecture">Lecture</option>
                             <option value="meeting">Meeting</option>
-                            <option value="appointment">Appointment</option>
-                            <option value="call">Call</option>
+                            <option value="whatever">Whatever</option>
                         </select>
                     </label>
 
@@ -139,7 +176,11 @@ function AddEventModal({ closeModal, selectionInfo, calendarRef }:
                     </label>
 
                     <div className="form-actions">
-                        <button type="submit" className="create-btn">Create</button>
+                    {
+                        eventToEdit
+                        ? <button type="submit" className="create-btn">Save</button>
+                        : <button type="submit" className="create-btn">Create</button>
+                    }
                     </div>
                 </form>
             </div>
