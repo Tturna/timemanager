@@ -1,0 +1,119 @@
+
+/* Page background */
+body[data-page-id="login-login"] {
+    min-height: 100vh;
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Helvetica, Arial, sans-serif;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hide default Keycloak header/logo area */
+#kc-header {
+    display: none;
+}
+
+/* Center container */
+body > div {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* Login card */
+#kc-content {
+    background: #ffffff;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 15px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Title */
+#kc-page-title {
+    margin: 0 0 20px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111;
+}
+
+/* Form layout */
+#kc-form-login {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Field groups */
+#kc-form-login > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Labels */
+#kc-form-login label {
+    font-size: 0.9rem;
+    color: #444;
+}
+
+/* Inputs */
+#kc-form-login input[type="text"],
+#kc-form-login input[type="password"] {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+#kc-form-login input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+/* Password field wrapper */
+#kc-form-login div[dir="ltr"] {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Password toggle button */
+#kc-form-login button[type="button"] {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+}
+
+#kc-form-login button[type="button"]:hover {
+    background: #f3f4f6;
+}
+
+/* Actions */
+#kc-form-buttons {
+    margin-top: 8px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Submit button */
+#kc-login {
+    background: #3b82f6;
+    color: #ffffff;
+    border: none;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#kc-login:hover {
+    background: #2563eb;
+}
+

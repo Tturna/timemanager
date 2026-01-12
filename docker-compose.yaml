@@ -16,7 +16,7 @@ services:
       POSTGRES_USER: "testadmin"
       POSTGRES_DB: "timemanager"
     volumes:
-      - ./data/:/var/lib/postgresql/data
+      - ./pgdata/:/var/lib/postgresql/data
     # temp. should run backend in the same net instead of exposing port
     ports:
       - 5432:5432
@@ -26,3 +26,23 @@ services:
     restart: unless-stopped
     ports:
       - 5400:8080
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.5
+    build: ./keycloak/
+    # command: start-dev --spi-theme--static-max-age=-1 --spi-theme--cache-themes=false --spi-theme--cache-templates=false
+    restart: unless-stopped
+    # environment:
+    #   KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
+    #   KC_BOOTSTRAP_ADMIN_PASSWORD: "change_me"
+    ports:
+      - 5500:8080
+    volumes:
+      - ./keycloak/keycloak.conf:/opt/keycloak/conf/keycloak.conf
+      - ./keycloak/timemanager_theme:/opt/keycloak/themes/timemanager_theme
+    secrets:
+      - keycloak_secrets
+
+secrets:
+  keycloak_secrets:
+    file: ./keycloak/secrets.env
