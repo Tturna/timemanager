@@ -1,4 +1,4 @@
-import type { Calendar, CalendarEvent, FetchInfo } from "@event-calendar/core";
+import type { CalendarApi, CalendarEvent, FetchInfo } from "@event-calendar/core";
 import type { RefObject } from "react";
 
 export type FetchEventsFn = (
@@ -8,7 +8,7 @@ export type FetchEventsFn = (
 ) => void
 
 export type AddEventFn = (
-    calendarRef: RefObject<Calendar | null>,
+    calendarRef: RefObject<CalendarApi | null>,
     title: string,
     start: Date,
     end: Date

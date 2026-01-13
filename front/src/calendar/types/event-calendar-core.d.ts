@@ -101,17 +101,17 @@ declare module '@event-calendar/core' {
         view: View
     }
 
-    export function createCalendar(...args: any[]): Calendar;
-    export function destroyCalendar(calendar: Calendar): void;
+    export function createCalendar(...args: any[]): CalendarApi;
+    export function destroyCalendar(calendar: CalendarApi): void;
     export const TimeGrid: any;
     export const DayGrid: any;
     export const List: any;
     export const Interaction: any;
 
-    export interface Calendar {
+    export interface CalendarApi {
         addEvent: (event: CalendarEvent) => void,
         unselect: () => void,
         getView: () => View,
-        refetchEvents: () => Calendar
+        refetchEvents: () => CalendarApi
     }
 }

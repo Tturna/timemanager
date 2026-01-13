@@ -1,5 +1,5 @@
 import { createCalendar, destroyCalendar, DayGrid, Interaction, List, TimeGrid,
-    type Calendar, type SelectionInfo, type EventDropInfo,
+    type CalendarApi, type SelectionInfo, type EventDropInfo,
     type EventResizeInfo,
     type EventClickInfo,
     type CalendarEvent} from "@event-calendar/core";
@@ -7,9 +7,9 @@ import { useEffect, useRef, type RefObject } from "react";
 import useCalendarEvents from "./useCalendarEvents";
 
 function useCalendar(calendarParentRef: RefObject<HTMLElement | null>, openModal: (eventToEdit?: CalendarEvent) => void)
-    : { calendarRef: RefObject<Calendar | null>, selectionInfoRef: RefObject<SelectionInfo | null> }
+    : { calendarRef: RefObject<CalendarApi | null>, selectionInfoRef: RefObject<SelectionInfo | null> }
 {
-    const calendarRef = useRef<Calendar | null>(null)
+    const calendarRef = useRef<CalendarApi | null>(null)
     const selectionInfoRef = useRef<SelectionInfo | null>(null)
     const { fetchEvents, syncEventToBackend } = useCalendarEvents()
 

@@ -1,9 +1,9 @@
-import type { Calendar, CalendarEvent, SelectionInfo } from "@event-calendar/core"
+import type { CalendarApi, CalendarEvent, SelectionInfo } from "@event-calendar/core"
 import { useRef, useEffect, useMemo, type RefObject } from "react"
 import type { JSX } from "react/jsx-runtime"
 import useCalendarEvents from "./useCalendarEvents"
 
-function getInitialEventData(calendar: Calendar, eventToEdit: CalendarEvent | null, selectionInfo: SelectionInfo | null) {
+function getInitialEventData(calendar: CalendarApi, eventToEdit: CalendarEvent | null, selectionInfo: SelectionInfo | null) {
     let initialTitle: string
 
     if (eventToEdit) {
@@ -70,7 +70,7 @@ function getEventDataFromFormData(data: FormData) {
 function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
 {
     closeModal: () => void,
-    calendarRef: RefObject<Calendar>,
+    calendarRef: RefObject<CalendarApi>,
     selectionInfo: SelectionInfo | null,
     eventToEdit: CalendarEvent | null
 })

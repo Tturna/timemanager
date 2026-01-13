@@ -1,4 +1,4 @@
-import type { Calendar, CalendarEvent, DisplayMode } from "@event-calendar/core"
+import type { CalendarApi, CalendarEvent, DisplayMode } from "@event-calendar/core"
 import type { RefObject } from "react"
 import type { CalendarEventModel } from "../types/api_schema"
 import type { AddEventFn, FetchEventsFn } from "./types/calendar_helper_types"
@@ -10,7 +10,7 @@ function useCalendarEvents() :
     syncEventToBackend: (event: CalendarEvent) => Promise<boolean>,
     deleteEvent: (id: string) => Promise<boolean>
 } {
-    const addEvent: AddEventFn = (calendarRef: RefObject<Calendar | null>, title: string, start: Date, end: Date) => {
+    const addEvent: AddEventFn = (calendarRef: RefObject<CalendarApi | null>, title: string, start: Date, end: Date) => {
         if (!calendarRef.current) return
 
         const options: RequestInit = {
