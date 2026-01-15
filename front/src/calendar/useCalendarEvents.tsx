@@ -3,7 +3,7 @@ import type { RefObject } from "react"
 import type { CalendarEventModel } from "../types/api_schema"
 import type { AddEventFn, FetchEventsFn } from "./types/calendar_helper_types"
 
-function useCalendarEvents() :
+function useCalendarEvents(updateStatusMessage: (message: string) => void) :
 {
     fetchEvents: FetchEventsFn,
     addEvent: AddEventFn,
@@ -48,8 +48,8 @@ function useCalendarEvents() :
 
             calendarRef.current.addEvent(newEvent)
         })
-        .catch(reason => {
-            console.log(reason)
+        .catch(_ => {
+            updateStatusMessage("Failed to add event. Try again later or contact the administrator.")
         })
 
         calendarRef.current.unselect()
@@ -72,8 +72,8 @@ function useCalendarEvents() :
         .then(_ => {
             return true
         })
-        .catch(reason => {
-            console.log(reason)
+        .catch(_ => {
+            updateStatusMessage("Failed to update events. Try again later or contact the administrator.")
             return false
         })
 
@@ -84,9 +84,8 @@ function useCalendarEvents() :
         failureCallback: (failureInfo?: any) => void) =>
     {
         fetch("http://localhost:5167/api/calendar/events")
-            .then((response: Response) => response.json()
+            .then((response: Response) => response.json())
             .then((events: CalendarEventModel[]) => {
-
                 successCallback(events.map((event: CalendarEventModel) => {
                     return {
                         id: event.id,
@@ -105,10 +104,10 @@ function useCalendarEvents() :
                     } as CalendarEvent
                 }))
             })
-            .catch((reason) => {
-                console.log(reason)
+            .catch(_ => {
+                updateStatusMessage("Failed to get events. Try again later or contact the administrator.")
                 failureCallback()
-            }))
+            })
     }
 
     const deleteEvent = (id: string) => {
@@ -118,8 +117,8 @@ function useCalendarEvents() :
 
         const result = fetch(`http://localhost:5167/api/calendar/deleteevent/${id}`, options)
         .then(_ => true)
-        .catch(reason => {
-            console.log(reason)
+        .catch(_ => {
+            updateStatusMessage("Failed to delete. Try again later or contact the administrator.")
             return false
         })
 

@@ -6,12 +6,17 @@ import { createCalendar, destroyCalendar, DayGrid, Interaction, List, TimeGrid,
 import { useEffect, useRef, type RefObject } from "react";
 import useCalendarEvents from "./useCalendarEvents";
 
-function useCalendar(calendarParentRef: RefObject<HTMLElement | null>, openModal: (eventToEdit?: CalendarEvent) => void)
-    : { calendarRef: RefObject<CalendarApi | null>, selectionInfoRef: RefObject<SelectionInfo | null> }
-{
+function useCalendar(
+    calendarParentRef: RefObject<HTMLElement | null>,
+    openModal: (eventToEdit?: CalendarEvent) => void,
+    updateStatusMessage: (message: string) => void
+) : {
+    calendarRef: RefObject<CalendarApi | null>,
+    selectionInfoRef: RefObject<SelectionInfo | null>
+} {
     const calendarRef = useRef<CalendarApi | null>(null)
     const selectionInfoRef = useRef<SelectionInfo | null>(null)
-    const { fetchEvents, syncEventToBackend } = useCalendarEvents()
+    const { fetchEvents, syncEventToBackend } = useCalendarEvents(updateStatusMessage)
 
     const dayStrings = [
         "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"

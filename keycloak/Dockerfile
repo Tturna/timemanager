@@ -16,8 +16,6 @@ FROM quay.io/keycloak/keycloak:26.5
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 COPY ./custom_start.sh /opt/keycloak/custom_start.sh
 
-# change these values to point to a running postgres instance
-ENV KC_HOSTNAME=localhost
 # ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
 ENTRYPOINT []
 CMD ["/opt/keycloak/custom_start.sh"]

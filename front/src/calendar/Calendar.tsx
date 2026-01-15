@@ -7,7 +7,7 @@ import AddEventModal from './AddEventModal';
 import useCalendar from './useCalendar';
 import { type CalendarEvent } from '@event-calendar/core';
 
-function Calendar() {
+function Calendar({ updateStatusMessage } : { updateStatusMessage: (message: string) => void }) {
     const [isCreatingEvent, setCreatingEvent] = useState(false)
     const eventToEditRef = useRef<CalendarEvent | null>(null)
 
@@ -25,7 +25,7 @@ function Calendar() {
     }
 
     const calendarParentRef = useRef<HTMLDivElement | null>(null)
-    const { calendarRef, selectionInfoRef } = useCalendar(calendarParentRef, openModal)
+    const { calendarRef, selectionInfoRef } = useCalendar(calendarParentRef, openModal, updateStatusMessage)
 
     return (
         <>
