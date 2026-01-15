@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 const userManagerSettings: UserManagerSettings = {
     authority: "http://localhost/auth/realms/timemanager/protocol/openid-connect/auth",
     client_id: "public-client",
+    metadataUrl: "http://localhost/auth/realms/timemanager/.well-known/openid-configuration",
     redirect_uri: "http://localhost/openid/callback",
     post_logout_redirect_uri: "http://localhost/",
     automaticSilentRenew: true
