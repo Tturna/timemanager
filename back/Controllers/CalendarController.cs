@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using back.Models;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
 public class CalendarController(TimeManagerDBContext dbContext) : ControllerBase
 {
     [HttpGet]
+    [Authorize]
     public ActionResult<IEnumerable<CalendarEventModel>> Events()
     {
         var events = dbContext.CalendarEvents.ToArray();
@@ -14,6 +16,7 @@ public class CalendarController(TimeManagerDBContext dbContext) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public ActionResult<CalendarEventModel> AddEvent([FromBody] NewEventDto newEventDto)
     {
         if (!ModelState.IsValid)
@@ -46,6 +49,7 @@ public class CalendarController(TimeManagerDBContext dbContext) : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize]
     public IActionResult EditEvent([FromBody] NewEventDto newEventDto, Guid id)
     {
         if (!ModelState.IsValid)
@@ -85,6 +89,7 @@ public class CalendarController(TimeManagerDBContext dbContext) : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize]
     public IActionResult DeleteEvent(Guid id)
     {
         var eventToDelete = dbContext.CalendarEvents.Find(id);

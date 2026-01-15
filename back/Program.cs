@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,29 @@ if (builder.Environment.IsDevelopment())
 
 builder.Services.AddOpenApi();
 
+builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        options.RequireHttpsMetadata = false;
+    }
+
+    options.Authority = builder.Configuration["Authentication:Authority"];
+    options.Audience = builder.Configuration["Authentication:Audience"];
+    options.MetadataAddress = builder.Configuration["Authentication:MetadataAddress"]
+        ?? throw new ArgumentNullException(
+            "MetadataAddress",
+            "Failed to set up JWT authentication. Authentication:MetadataAddress missing from configuration.");
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidIssuer = builder.Configuration["Authentication:ValidIssuer"],
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true
+    };
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -37,7 +62,8 @@ if (app.Environment.IsDevelopment())
     app.UseCors("devAllowAll");
 }
 
-// app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Map attribute-routed controllers
 app.MapControllers();

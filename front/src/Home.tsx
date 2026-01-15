@@ -11,9 +11,8 @@ function Home({ updateStatusMessage } : { updateStatusMessage: (message: string)
         .then(user => {
             setUser(user)
         })
-        .catch(reason => {
-            console.log("Couldn't load logged in user data")
-            console.log(reason)
+        .catch(_ => {
+            updateStatusMessage("Couldn't load logged in user data")
         })
     }, [])
 

@@ -2,6 +2,7 @@ import type { CalendarApi, CalendarEvent, DisplayMode } from "@event-calendar/co
 import type { RefObject } from "react"
 import type { CalendarEventModel } from "../types/api_schema"
 import type { AddEventFn, FetchEventsFn } from "./types/calendar_helper_types"
+import auth from "../auth/auth"
 
 function useCalendarEvents(updateStatusMessage: (message: string) => void) :
 {
@@ -83,8 +84,23 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
     const fetchEvents: FetchEventsFn = (_, successCallback: (events: CalendarEvent[]) => void,
         failureCallback: (failureInfo?: any) => void) =>
     {
-        fetch("http://localhost:5167/api/calendar/events")
-            .then((response: Response) => response.json())
+        auth.userManager.getUser()
+        .then(user => {
+            if (user == null) {
+                updateStatusMessage("Couldn't load logged in user data.")
+                failureCallback()
+            }
+
+            const token = user!.access_token
+
+            const requestOptions: RequestInit = {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+
+            fetch("http://localhost:5167/api/calendar/events", requestOptions)
+                .then((response: Response) => response.json())
             .then((events: CalendarEventModel[]) => {
                 successCallback(events.map((event: CalendarEventModel) => {
                     return {
@@ -108,6 +124,11 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
                 updateStatusMessage("Failed to get events. Try again later or contact the administrator.")
                 failureCallback()
             })
+        })
+        .catch(_ => {
+            updateStatusMessage("Couldn't load logged in user data.")
+            failureCallback()
+        })
     }
 
     const deleteEvent = (id: string) => {
