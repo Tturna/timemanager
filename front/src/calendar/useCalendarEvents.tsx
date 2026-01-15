@@ -14,71 +14,94 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
     const addEvent: AddEventFn = (calendarRef: RefObject<CalendarApi | null>, title: string, start: Date, end: Date) => {
         if (!calendarRef.current) return
 
-        const options: RequestInit = {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                title,
-                startDateTime: start.toISOString(),
-                endDateTime: end.toISOString()
-            })
-        }
+        auth.userManager.getUser()
+        .then(user => {
+            if (user == null) {
+                updateStatusMessage("Couldn't load logged in user data.")
+                return
+            }
 
-        fetch("http://localhost:5167/api/calendar/addevent", options)
-        .then((response: Response) => response.json())
-        .then((createdEvent: CalendarEventModel) => {
-            if (!calendarRef.current) return
+            const options: RequestInit = {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${user.access_token}`
+                },
+                body: JSON.stringify({
+                    title,
+                    startDateTime: start.toISOString(),
+                    endDateTime: end.toISOString()
+                })
+            }
 
-            const newEvent = {
-                id: createdEvent.id,
-                resourceIds: [],
-                allDay: false,
-                start,
-                end,
-                title: title,
-                editable: true,
-                startEditable: true,
-                durationEditable: true,
-                display: "auto" as DisplayMode,
-                classNames: [],
-                styles: [],
-                extendedProps: []
-            } as CalendarEvent
+            fetch("http://localhost:5167/api/calendar/addevent", options)
+                .then((response: Response) => response.json())
+                .then((createdEvent: CalendarEventModel) => {
+                    if (!calendarRef.current) return
 
-            calendarRef.current.addEvent(newEvent)
+                        const newEvent = {
+                            id: createdEvent.id,
+                            resourceIds: [],
+                            allDay: false,
+                            start,
+                            end,
+                            title: title,
+                            editable: true,
+                            startEditable: true,
+                            durationEditable: true,
+                            display: "auto" as DisplayMode,
+                            classNames: [],
+                            styles: [],
+                            extendedProps: []
+                        } as CalendarEvent
+
+                        calendarRef.current.addEvent(newEvent)
+                })
+                .catch(_ => {
+                    updateStatusMessage("Failed to add event. Try again later or contact the administrator.")
+                })
         })
         .catch(_ => {
-            updateStatusMessage("Failed to add event. Try again later or contact the administrator.")
+            updateStatusMessage("Couldn't load logged in user data.")
         })
 
         calendarRef.current.unselect()
     }
 
     const syncEventToBackend = (event: CalendarEvent) => {
-        const options: RequestInit = {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                title: event.title,
-                startDateTime: event.start.toISOString(),
-                endDateTime: event.end.toISOString()
-            })
-        }
+        return auth.userManager.getUser()
+        .then(user => {
+            if (user == null) {
+                updateStatusMessage("Couldn't load logged in user data.")
+                return false
+            }
 
-        const result = fetch(`http://localhost:5167/api/calendar/editevent/${event.id}`, options)
-        .then(_ => {
-            return true
+            const options: RequestInit = {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${user.access_token}`
+                },
+                body: JSON.stringify({
+                    title: event.title,
+                    startDateTime: event.start.toISOString(),
+                    endDateTime: event.end.toISOString()
+                })
+            }
+
+            return fetch(`http://localhost:5167/api/calendar/editevent/${event.id}`, options)
+                .then(_ => {
+                return true
+            })
+            .catch(_ => {
+                updateStatusMessage("Failed to update events. Try again later or contact the administrator.")
+                return false
+            })
         })
         .catch(_ => {
-            updateStatusMessage("Failed to update events. Try again later or contact the administrator.")
+            updateStatusMessage("Couldn't load logged in user data.")
             return false
         })
-
-        return result
     }
 
     const fetchEvents: FetchEventsFn = (_, successCallback: (events: CalendarEvent[]) => void,
@@ -89,13 +112,12 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
             if (user == null) {
                 updateStatusMessage("Couldn't load logged in user data.")
                 failureCallback()
+                return
             }
-
-            const token = user!.access_token
 
             const requestOptions: RequestInit = {
                 headers: {
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${user.access_token}`
                 }
             }
 
@@ -132,18 +154,27 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
     }
 
     const deleteEvent = (id: string) => {
-        const options: RequestInit = {
-            method: "DELETE"
-        }
+        return auth.userManager.getUser()
+        .then(user => {
+            if (user == null) {
+                updateStatusMessage("Couldn't load logged in user data.")
+                return false
+            }
 
-        const result = fetch(`http://localhost:5167/api/calendar/deleteevent/${id}`, options)
-        .then(_ => true)
-        .catch(_ => {
-            updateStatusMessage("Failed to delete. Try again later or contact the administrator.")
-            return false
+            const options: RequestInit = {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${user.access_token}`
+                }
+            }
+
+            return fetch(`http://localhost:5167/api/calendar/deleteevent/${id}`, options)
+                .then(_ => true)
+            .catch(_ => {
+                updateStatusMessage("Failed to delete. Try again later or contact the administrator.")
+                return false
+            })
         })
-
-        return result
     }
 
     return { fetchEvents, addEvent, syncEventToBackend, deleteEvent }

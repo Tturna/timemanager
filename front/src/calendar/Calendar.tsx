@@ -39,6 +39,7 @@ function Calendar({ updateStatusMessage } : { updateStatusMessage: (message: str
                 selectionInfo={ selectionInfoRef.current } // may be null
                 calendarRef={ calendarRef as RefObject<CalendarApi> }
                 eventToEdit={ eventToEditRef.current } // may be null
+                updateStatusMessage={ updateStatusMessage }
             />
         }
         </>

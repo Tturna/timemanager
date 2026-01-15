@@ -67,12 +67,13 @@ function getEventDataFromFormData(data: FormData) {
     return { title, startDateTime, endDateTime }
 }
 
-function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
+function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, updateStatusMessage }:
 {
     closeModal: () => void,
     calendarRef: RefObject<CalendarApi>,
     selectionInfo: SelectionInfo | null,
-    eventToEdit: CalendarEvent | null
+    eventToEdit: CalendarEvent | null,
+    updateStatusMessage: (message: string) => void
 })
 {
     const calendar = calendarRef?.current
@@ -82,7 +83,7 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit }:
     }
 
     const modalRef = useRef<HTMLDivElement | null>(null)
-    const { addEvent, syncEventToBackend, deleteEvent } = useCalendarEvents()
+    const { addEvent, syncEventToBackend, deleteEvent } = useCalendarEvents(updateStatusMessage)
 
     const { initialTitle, initialStartDateTime, initialEndDateTime } = getInitialEventData(calendar, eventToEdit, selectionInfo)
 
