@@ -7,6 +7,8 @@ public sealed record class CalendarEventModel
     [Required]
     public Guid Id { get; set; }
     [Required]
+    public required string UserId { get; set; }
+    [Required]
     public required string Title { get; set; }
     [Required]
     public DateTime StartDateTime { get; set; }
