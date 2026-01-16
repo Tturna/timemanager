@@ -1,14 +1,24 @@
 import Calendar from "./calendar/Calendar"
 import auth from "./auth/auth"
-import { useEffect, useState, type ReactElement } from "react"
+import { useEffect, useRef, useState, type ReactElement } from "react"
 import { User } from "oidc-client-ts"
 
 function Home({ updateStatusMessage } : { updateStatusMessage: (message: string) => void }) {
     const [user, setUser] = useState<User | null>(null)
+    const redirectedToLoginRef = useRef(false)
 
     useEffect(() =>{
         auth.userManager.getUser()
         .then(user => {
+            if (!user) {
+                if (!redirectedToLoginRef.current) {
+                    redirectedToLoginRef.current = true
+                    auth.handleLogin(updateStatusMessage)
+                }
+
+                return
+            }
+
             setUser(user)
         })
         .catch(_ => {

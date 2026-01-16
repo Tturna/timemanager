@@ -11,13 +11,18 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
     syncEventToBackend: (event: CalendarEvent) => Promise<boolean>,
     deleteEvent: (id: string) => Promise<boolean>
 } {
-    const addEvent: AddEventFn = (calendarRef: RefObject<CalendarApi | null>, title: string, start: Date, end: Date) => {
+    const addEvent: AddEventFn = (
+        calendarRef: RefObject<CalendarApi | null>,
+        title: string,
+        start: Date, end: Date
+    ) => {
         if (!calendarRef.current) return
 
         auth.userManager.getUser()
         .then(user => {
             if (user == null) {
-                updateStatusMessage("Couldn't load logged in user data.")
+                // User probably not authenticated
+                updateStatusMessage("You must sign in to add events")
                 return
             }
 
@@ -110,7 +115,7 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
         auth.userManager.getUser()
         .then(user => {
             if (user == null) {
-                updateStatusMessage("Couldn't load logged in user data.")
+                // User probably not authenticated
                 failureCallback()
                 return
             }
@@ -157,7 +162,7 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
         return auth.userManager.getUser()
         .then(user => {
             if (user == null) {
-                updateStatusMessage("Couldn't load logged in user data.")
+                // User probably not authenticated
                 return false
             }
 
@@ -174,6 +179,10 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
                 updateStatusMessage("Failed to delete. Try again later or contact the administrator.")
                 return false
             })
+        })
+        .catch(_ => {
+            updateStatusMessage("Couldn't load logged in user data.")
+            return false
         })
     }
 
