@@ -1,7 +1,7 @@
 import type { CalendarApi, CalendarEvent, FetchInfo } from "@event-calendar/core";
 import type { RefObject } from "react";
 
-export type FetchEventsFn = (
+export type UpdateCalendarInterfaceEventsFn = (
     fetchInfo: FetchInfo,
     successCallback: (events: CalendarEvent[]) => void,
     failureCallback: (failureInfo?: unknown) => void

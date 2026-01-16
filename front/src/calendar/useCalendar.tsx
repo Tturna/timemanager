@@ -16,7 +16,7 @@ function useCalendar(
 } {
     const calendarRef = useRef<CalendarApi | null>(null)
     const selectionInfoRef = useRef<SelectionInfo | null>(null)
-    const { fetchEvents, syncEventToBackend } = useCalendarEvents(updateStatusMessage)
+    const { updateCalendarInterfaceEvents, syncEventToBackend } = useCalendarEvents(updateStatusMessage)
 
     const dayStrings = [
         "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
@@ -71,7 +71,7 @@ function useCalendar(
             // Options object
             {
                 view: 'timeGridWeek',
-                eventSources: [{ events: fetchEvents }],
+                eventSources: [{ events: updateCalendarInterfaceEvents }],
                 pointer: true,
                 nowIndicator: true,
                 selectable: true,

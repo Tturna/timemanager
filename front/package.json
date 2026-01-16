@@ -11,6 +11,7 @@
     "api-gen": "npx openapi-typescript http://localhost:5167/openapi/v1.json --root-types --root-types-no-schema-prefix -o ./src/types/api_schema.d.ts"
   },
   "dependencies": {
+    "jspdf": "^4.0.0",
     "oidc-client-ts": "^3.4.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

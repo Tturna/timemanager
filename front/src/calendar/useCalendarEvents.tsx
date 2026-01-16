@@ -1,12 +1,13 @@
 import type { CalendarApi, CalendarEvent, DisplayMode } from "@event-calendar/core"
 import type { RefObject } from "react"
 import type { CalendarEventModel } from "../types/api_schema"
-import type { AddEventFn, FetchEventsFn } from "./types/calendar_helper_types"
+import type { AddEventFn, UpdateCalendarInterfaceEventsFn } from "./types/calendar_helper_types"
 import auth from "../auth/auth"
 
 function useCalendarEvents(updateStatusMessage: (message: string) => void) :
 {
-    fetchEvents: FetchEventsFn,
+    fetchEvents: (failureCallback: () => void) => Promise<CalendarEventModel[]>,
+    updateCalendarInterfaceEvents: UpdateCalendarInterfaceEventsFn,
     addEvent: AddEventFn,
     syncEventToBackend: (event: CalendarEvent) => Promise<boolean>,
     deleteEvent: (id: string) => Promise<boolean>
@@ -109,52 +110,72 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
         })
     }
 
-    const fetchEvents: FetchEventsFn = (_, successCallback: (events: CalendarEvent[]) => void,
-        failureCallback: (failureInfo?: any) => void) =>
+    const fetchEvents: (failureCallback: () => void) => Promise<CalendarEventModel[]> = (
+        failureCallback: () => void
+    ) =>
     {
-        auth.userManager.getUser()
-        .then(user => {
-            if (user == null) {
-                // User probably not authenticated
-                failureCallback()
-                return
-            }
-
-            const requestOptions: RequestInit = {
-                headers: {
-                    Authorization: `Bearer ${user.access_token}`
+        return new Promise((resolve, reject) => {
+            auth.userManager.getUser()
+            .then(user => {
+                if (user == null) {
+                    // User probably not authenticated
+                    failureCallback()
+                    reject("Couldn't load logged in user data.")
+                    return
                 }
-            }
 
-            fetch("http://localhost:5167/api/calendar/events", requestOptions)
+                const requestOptions: RequestInit = {
+                    headers: {
+                        Authorization: `Bearer ${user.access_token}`
+                    }
+                }
+
+                fetch("http://localhost:5167/api/calendar/events", requestOptions)
                 .then((response: Response) => response.json())
-            .then((events: CalendarEventModel[]) => {
-                successCallback(events.map((event: CalendarEventModel) => {
-                    return {
-                        id: event.id,
-                        resourceIds: [],
-                        allDay: false,
-                        start: new Date(event.startDateTime),
-                        end: new Date(event.endDateTime),
-                        title: event.title,
-                        editable: true,
-                        startEditable: true,
-                        durationEditable: true,
-                        display: "auto" as DisplayMode,
-                        classNames: [],
-                        styles: [],
-                        extendedProps: []
-                    } as CalendarEvent
-                }))
+                .then((events: CalendarEventModel[]) => {
+                    resolve(events)
+                    return
+                })
+                .catch(_ => {
+                    updateStatusMessage("Failed to get events. Try again later or contact the administrator.")
+                    failureCallback()
+                    reject("Failed to get events. Try again later or contact the administrator.")
+                    return
+                })
             })
             .catch(_ => {
-                updateStatusMessage("Failed to get events. Try again later or contact the administrator.")
+                updateStatusMessage("Couldn't load logged in user data.")
                 failureCallback()
+                reject("Couldn't load logged in user data.")
+                return
             })
         })
-        .catch(_ => {
-            updateStatusMessage("Couldn't load logged in user data.")
-            failureCallback()
+    }
+
+    const updateCalendarInterfaceEvents: UpdateCalendarInterfaceEventsFn = (
+        _,
+        successCallback: (events: CalendarEvent[]) => void,
+        failureCallback: (failureInfo?: any) => void
+    ) => {
+        fetchEvents(failureCallback)
+        .then(events => {
+            successCallback(events.map((event: CalendarEventModel) => {
+                return {
+                    id: event.id,
+                    resourceIds: [],
+                    allDay: false,
+                    start: new Date(event.startDateTime),
+                    end: new Date(event.endDateTime),
+                    title: event.title,
+                    editable: true,
+                    startEditable: true,
+                    durationEditable: true,
+                    display: "auto" as DisplayMode,
+                    classNames: [],
+                    styles: [],
+                    extendedProps: []
+                } as CalendarEvent
+            }))
         })
     }
 
@@ -186,7 +207,7 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
         })
     }
 
-    return { fetchEvents, addEvent, syncEventToBackend, deleteEvent }
+    return { fetchEvents, updateCalendarInterfaceEvents, addEvent, syncEventToBackend, deleteEvent }
 }
 
 export default useCalendarEvents
