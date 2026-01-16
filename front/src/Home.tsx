@@ -44,7 +44,7 @@ function Home({ updateStatusMessage } : { updateStatusMessage: (message: string)
     }
 
     const handleExportPdf = () => {
-        exporter.exportEventsPdf()
+        exporter.exportEventsPdf(updateStatusMessage)
     }
 
     return (

@@ -6,7 +6,7 @@ import auth from "../auth/auth"
 
 function useCalendarEvents(updateStatusMessage: (message: string) => void) :
 {
-    fetchEvents: (failureCallback: () => void) => Promise<CalendarEventModel[]>,
+    fetchEvents: (failureCallback?: () => void) => Promise<CalendarEventModel[]>,
     updateCalendarInterfaceEvents: UpdateCalendarInterfaceEventsFn,
     addEvent: AddEventFn,
     syncEventToBackend: (event: CalendarEvent) => Promise<boolean>,
@@ -110,16 +110,13 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
         })
     }
 
-    const fetchEvents: (failureCallback: () => void) => Promise<CalendarEventModel[]> = (
-        failureCallback: () => void
-    ) =>
-    {
-        return new Promise((resolve, reject) => {
+    const fetchEvents = (failureCallback?: () => void) => {
+        const promise: Promise<CalendarEventModel[]> = new Promise((resolve, reject) => {
             auth.userManager.getUser()
             .then(user => {
                 if (user == null) {
                     // User probably not authenticated
-                    failureCallback()
+                    if (failureCallback) failureCallback()
                     reject("Couldn't load logged in user data.")
                     return
                 }
@@ -138,18 +135,20 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
                 })
                 .catch(_ => {
                     updateStatusMessage("Failed to get events. Try again later or contact the administrator.")
-                    failureCallback()
+                    if (failureCallback) failureCallback()
                     reject("Failed to get events. Try again later or contact the administrator.")
                     return
                 })
             })
             .catch(_ => {
                 updateStatusMessage("Couldn't load logged in user data.")
-                failureCallback()
+                if (failureCallback) failureCallback()
                 reject("Couldn't load logged in user data.")
                 return
             })
         })
+
+        return promise
     }
 
     const updateCalendarInterfaceEvents: UpdateCalendarInterfaceEventsFn = (
