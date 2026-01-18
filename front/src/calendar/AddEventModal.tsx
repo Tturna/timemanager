@@ -2,6 +2,7 @@ import type { CalendarApi, CalendarEvent, SelectionInfo } from "@event-calendar/
 import { useRef, useEffect, useMemo, type RefObject, type ChangeEvent, useState } from "react"
 import type { JSX } from "react/jsx-runtime"
 import useCalendarEvents from "./useCalendarEvents"
+import type { EventTypeModel } from "../types/api_schema"
 
 function getInitialEventData(calendar: CalendarApi, eventToEdit: CalendarEvent | null, selectionInfo: SelectionInfo | null) {
     let initialTitle: string
@@ -11,7 +12,8 @@ function getInitialEventData(calendar: CalendarApi, eventToEdit: CalendarEvent |
     }
     else {
         // Default title option
-        initialTitle = "lecture"
+        // initialTitle = "lecture"
+        initialTitle = ""
     }
 
     let initialStartDateTime: Date
@@ -85,8 +87,8 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
     }
 
     const modalRef = useRef<HTMLDivElement | null>(null)
-    const { addEvent, syncEventToBackend, deleteEvent } = useCalendarEvents(updateStatusMessage)
-
+    const [existingEventTypes, setExistingEventTypes] = useState<EventTypeModel[] | null>(null)
+    const { fetchEventTypes, addEvent, syncEventToBackend, deleteEvent } = useCalendarEvents(updateStatusMessage)
     const { initialTitle, initialStartDateTime, initialEndDateTime } = getInitialEventData(calendar, eventToEdit, selectionInfo)
 
     const timeOptionElements = useMemo(() => {
@@ -143,6 +145,12 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
         }
         else {
             addEvent(calendarRef, title, startDateTime, endDateTime)
+
+            if (existingEventTypes) {
+                // use the length of the array as a temp ID
+                existingEventTypes.push({ id: existingEventTypes.length.toString(), name: title })
+                setExistingEventTypes(existingEventTypes)
+            }
         }
 
         closeModal()
@@ -183,6 +191,13 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
     }
 
     useEffect(() => {
+        fetchEventTypes()
+        .then(eventTypes => {
+            setExistingEventTypes(eventTypes)
+        })
+        .catch(_ => {
+        })
+
         const handler = (event: MouseEvent) => {
             if (!modalRef.current) {
                 return
@@ -204,7 +219,7 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
             // capture = true
             document.removeEventListener("mousedown", handler, true)
         }
-    }, [closeModal])
+    }, [])
 
     return (
         <div className="modal-overlay">
@@ -220,9 +235,11 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
                         <span>Event Type</span>
                         <input name="eventType" type="text" list="existingTypeOptions" defaultValue={initialTitle} />
                         <datalist id="existingTypeOptions">
-                            <option value="lecture">Lecture</option>
-                            <option value="meeting">Meeting</option>
-                            <option value="whatever">Whatever</option>
+                        {
+                            existingEventTypes?.map(eventType => {
+                                return <option key={eventType.id} value={eventType.name}>{eventType.name}</option>
+                            })
+                        }
                         </datalist>
                     </label>
 

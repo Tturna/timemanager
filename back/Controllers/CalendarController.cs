@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using back.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
@@ -33,9 +34,27 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
             return new ForbidResult();
         }
 
-        var userEvents = dbContext.CalendarEvents.Where(cEvent => cEvent.UserId == userId);
+        var userEvents = dbContext.CalendarEvents
+            .Where(cEvent => cEvent.UserId == userId)
+            .Include(cEvent => cEvent.EventType);
 
         return new JsonResult(userEvents);
+    }
+
+    [HttpGet]
+    [Authorize]
+    public ActionResult<IEnumerable<EventTypeModel>> EventTypes()
+    {
+        if (!TryGetUserId(out var userId))
+        {
+            return new ForbidResult();
+        }
+
+        // TODO: Consider making event types user specific.
+
+        var eventTypes = dbContext.CalendarEventTypes.AsQueryable();
+
+        return new JsonResult(eventTypes);
     }
 
     [HttpPost]
@@ -55,11 +74,25 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
         var startDateTime = DateTime.SpecifyKind(newEventDto.StartDateTime, DateTimeKind.Utc);
         var endDateTime = DateTime.SpecifyKind(newEventDto.EndDateTime, DateTimeKind.Utc);
 
+        var eventType = dbContext.CalendarEventTypes.FirstOrDefault((EventTypeModel cEvent) => cEvent.Name == newEventDto.Title);
+        var newEventTypeAdded = false;
+
+        if (eventType is null)
+        {
+            newEventTypeAdded = true;
+
+            eventType = new EventTypeModel
+            {
+                Id = Guid.CreateVersion7(),
+                Name = newEventDto.Title
+            };
+        }
+
         var newEvent = new CalendarEventModel()
         {
             Id = Guid.CreateVersion7(),
             UserId = userId,
-            Title = newEventDto.Title,
+            EventType = eventType,
             StartDateTime = startDateTime,
             EndDateTime = endDateTime
         };
@@ -67,6 +100,12 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
         try
         {
             dbContext.CalendarEvents.Add(newEvent);
+
+            if (newEventTypeAdded)
+            {
+                dbContext.CalendarEventTypes.Add(eventType);
+            }
+
             dbContext.SaveChanges();
         }
         catch
@@ -118,9 +157,28 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
         var newStartDateTime = DateTime.SpecifyKind(newEventDto.StartDateTime, DateTimeKind.Utc);
         var newEndDateTime = DateTime.SpecifyKind(newEventDto.EndDateTime, DateTimeKind.Utc);
 
-        eventToEdit.Title = newEventDto.Title;
+        var eventType = dbContext.CalendarEventTypes.FirstOrDefault((EventTypeModel cEvent) => cEvent.Name == newEventDto.Title);
+        var newEventTypeAdded = false;
+
+        if (eventType is null)
+        {
+            newEventTypeAdded = true;
+
+            eventType = new EventTypeModel
+            {
+                Id = Guid.CreateVersion7(),
+                Name = newEventDto.Title
+            };
+        }
+
+        eventToEdit.EventType = eventType;
         eventToEdit.StartDateTime = newStartDateTime;
         eventToEdit.EndDateTime = newEndDateTime;
+
+        if (newEventTypeAdded)
+        {
+            dbContext.CalendarEventTypes.Add(eventType);
+        }
 
         dbContext.SaveChanges();
 

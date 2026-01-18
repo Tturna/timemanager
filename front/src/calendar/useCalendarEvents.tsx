@@ -1,6 +1,6 @@
 import type { CalendarApi, CalendarEvent, DisplayMode } from "@event-calendar/core"
 import type { RefObject } from "react"
-import type { CalendarEventModel } from "../types/api_schema"
+import type { CalendarEventModel, EventTypeModel } from "../types/api_schema"
 import type { AddEventFn, UpdateCalendarInterfaceEventsFn } from "./types/calendar_helper_types"
 import auth from "../auth/auth"
 import type { User } from "oidc-client-ts"
@@ -9,6 +9,7 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
 {
     fetchEvents: (failureCallback?: () => void) => Promise<CalendarEventModel[]>,
     fetchEventsWithUser: (user: User, failureCallback?: () => void) => Promise<CalendarEventModel[]>,
+    fetchEventTypes: () => Promise<EventTypeModel[]>,
     updateCalendarInterfaceEvents: UpdateCalendarInterfaceEventsFn,
     addEvent: AddEventFn,
     syncEventToBackend: (event: CalendarEvent) => Promise<boolean>,
@@ -162,6 +163,40 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
         return promise
     }
 
+    const fetchEventTypes = () => {
+        return new Promise<EventTypeModel[]>((resolve, reject) => {
+            auth.userManager.getUser()
+            .then(user => {
+                if (user == null) {
+                    updateStatusMessage("Couldn't load logged in user data.")
+                    reject("Couldn't load logged in user data.")
+                    return
+                }
+
+                const requestOptions: RequestInit = {
+                    headers: {
+                        Authorization: `Bearer ${user.access_token}`
+                    }
+                }
+
+                fetch("http://localhost:5167/api/calendar/eventtypes", requestOptions)
+                .then((response: Response) => response.json())
+                .then((eventTypes: EventTypeModel[]) => {
+                    resolve(eventTypes)
+                })
+                .catch(_ => {
+                    updateStatusMessage("Failed to get event types. Try again later or contact the administrator.")
+                    reject("Failed to get event types. Try again later or contact the administrator.")
+                })
+
+            })
+            .catch(_ => {
+                updateStatusMessage("Couldn't load logged in user data.")
+                reject("Couldn't load logged in user data.")
+            })
+        })
+    }
+
     const updateCalendarInterfaceEvents: UpdateCalendarInterfaceEventsFn = (
         _,
         successCallback: (events: CalendarEvent[]) => void,
@@ -176,7 +211,7 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
                     allDay: false,
                     start: new Date(event.startDateTime),
                     end: new Date(event.endDateTime),
-                    title: event.title,
+                    title: event.eventType.name,
                     editable: true,
                     startEditable: true,
                     durationEditable: true,
@@ -217,8 +252,14 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
         })
     }
 
-    return { fetchEvents, fetchEventsWithUser, updateCalendarInterfaceEvents, addEvent,
-        syncEventToBackend, deleteEvent }
+    return {
+        fetchEvents,
+        fetchEventsWithUser,
+        fetchEventTypes,
+        updateCalendarInterfaceEvents,
+        addEvent,
+        syncEventToBackend,
+        deleteEvent }
 }
 
 export default useCalendarEvents

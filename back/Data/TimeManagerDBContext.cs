@@ -6,4 +6,5 @@ public class TimeManagerDBContext : DbContext
     public TimeManagerDBContext(DbContextOptions options) : base(options) { }
 
     public DbSet<CalendarEventModel> CalendarEvents { get; set; }
+    public DbSet<EventTypeModel> CalendarEventTypes { get; set; }
 }

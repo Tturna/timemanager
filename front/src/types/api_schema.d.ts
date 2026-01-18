@@ -41,6 +41,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/Calendar/EventTypes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["EventTypeModel"][];
+                        "application/json": components["schemas"]["EventTypeModel"][];
+                        "text/json": components["schemas"]["EventTypeModel"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/Calendar/AddEvent": {
         parameters: {
             query?: never;
@@ -167,11 +204,17 @@ export interface components {
         CalendarEventModel: {
             /** Format: uuid */
             id: string;
-            title: string;
+            userId: string;
+            eventType: components["schemas"]["EventTypeModel"];
             /** Format: date-time */
             startDateTime: string;
             /** Format: date-time */
             endDateTime: string;
+        };
+        EventTypeModel: {
+            /** Format: uuid */
+            id: string;
+            name: string;
         };
         NewEventDto: {
             title: string;
@@ -188,6 +231,7 @@ export interface components {
     pathItems: never;
 }
 export type CalendarEventModel = components['schemas']['CalendarEventModel'];
+export type EventTypeModel = components['schemas']['EventTypeModel'];
 export type NewEventDto = components['schemas']['NewEventDto'];
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;
