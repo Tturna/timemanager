@@ -30,6 +30,41 @@
     font-weight: 600;
 }
 
+/* Date input link icon */
+.modal-form-dateselector-container {
+    position: relative;
+}
+
+.modal-link-container {
+    position: absolute;
+    min-width: 32px;
+    min-height: 32px;
+    padding: 4px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    left: 240px;
+    top: 50%;
+    transform: translate(0, -10px);
+    text-align: center;
+}
+
+.modal-link-container:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.modal-link-container:active {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.modal-link-icon {
+    display: block;
+    width: 40px;
+    height: 40px;
+}
+
 /* Form */
 .event-form {
     display: flex;

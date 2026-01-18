@@ -1,5 +1,5 @@
 import type { CalendarApi, CalendarEvent, SelectionInfo } from "@event-calendar/core"
-import { useRef, useEffect, useMemo, type RefObject } from "react"
+import { useRef, useEffect, useMemo, type RefObject, type ChangeEvent, useState } from "react"
 import type { JSX } from "react/jsx-runtime"
 import useCalendarEvents from "./useCalendarEvents"
 
@@ -77,6 +77,8 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
 })
 {
     const calendar = calendarRef?.current
+    const endDateInputRef = useRef<HTMLInputElement | null>(null)
+    const [dateInputsLinked, setDateInputsLinked] = useState(true)
 
     if (!calendar) {
         throw new Error("AddEventModal rendered without valid calendar reference!")
@@ -169,6 +171,17 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
         closeModal()
     }
 
+    const handleChangeStartDate = (event: ChangeEvent<HTMLInputElement>) => {
+        if (!endDateInputRef.current) return
+        if (!dateInputsLinked) return
+
+        endDateInputRef.current.value = event.target.value
+    }
+
+    const handleToggleDateLink = () => {
+        setDateInputsLinked(!dateInputsLinked)
+    }
+
     useEffect(() => {
         const handler = (event: MouseEvent) => {
             if (!modalRef.current) {
@@ -212,25 +225,45 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
                         </select>
                     </label>
 
-                    <label className="form-group">
-                        <span>Start Time</span>
-                        <div>
-                            <input type="date" name="startDate" defaultValue={initialStartDateTime.toISOString().slice(0, 10)} />
-                            <select name="startTime" defaultValue={initialStartDateTime.toISOString()}>
-                            { timeOptionElements }
-                            </select>
-                        </div>
-                    </label>
+                    <div className="modal-form-dateselector-container">
+                        <label className="form-group">
+                            <span>Start Time</span>
+                            <div>
+                                <input
+                                    type="date"
+                                    name="startDate"
+                                    defaultValue={initialStartDateTime.toISOString().slice(0, 10)}
+                                    onChange={handleChangeStartDate}
+                                />
+                                <select name="startTime" defaultValue={initialStartDateTime.toISOString()}>
+                                { timeOptionElements }
+                                </select>
+                            </div>
+                        </label>
 
-                    <label className="form-group">
-                        <span>End Time</span>
-                        <div>
-                            <input type="date" name="endDate" defaultValue={initialEndDateTime.toISOString().slice(0, 10)} />
-                            <select name="endTime" defaultValue={initialEndDateTime.toISOString()}>
-                            { timeOptionElements }
-                            </select>
+                        <div className="modal-link-container">
+                        {
+                            dateInputsLinked
+                            ? <img src="link_icon.svg" className="modal-link-icon" onClick={handleToggleDateLink} />
+                            : <img src="link_off_icon.svg" className="modal-link-icon" onClick={handleToggleDateLink} />
+                        }
                         </div>
-                    </label>
+
+                        <label className="form-group">
+                            <span>End Time</span>
+                            <div>
+                                <input
+                                    ref={endDateInputRef}
+                                    type="date"
+                                    name="endDate"
+                                    defaultValue={initialEndDateTime.toISOString().slice(0, 10)}
+                                />
+                                <select name="endTime" defaultValue={initialEndDateTime.toISOString()}>
+                                { timeOptionElements }
+                                </select>
+                            </div>
+                        </label>
+                    </div>
 
                     <div className="form-actions">
                     {
