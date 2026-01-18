@@ -62,6 +62,10 @@ function useCalendar(
         openModal(info.event)
     }
 
+    const setCalendarStyling = (defaultTheme: {}) => {
+        return defaultTheme
+    }
+
     useEffect(() => {
         calendarRef.current = createCalendar(
             // HTML element the calendar will be mounted to
@@ -83,7 +87,9 @@ function useCalendar(
                 select: handleSelect,
                 eventDrop: handleEventDrop,
                 eventResize: handleEventResize,
-                eventClick: handleEventClick
+                eventClick: handleEventClick,
+                theme: setCalendarStyling,
+                headerToolbar: { start: "title today prev,next", center: "", end: ""}
             }
         );
 
