@@ -1,76 +1,111 @@
 import { jsPDF } from 'jspdf'
 import useCalendarEvents from '../calendar/useCalendarEvents'
 import type { CalendarEventModel } from '../types/api_schema'
+import auth from '../auth/auth'
 
 function exportEventsPdf(updateStatusMessage: (message: string) => void) {
-    const { fetchEvents } = useCalendarEvents(updateStatusMessage)
+    const { fetchEventsWithUser } = useCalendarEvents(updateStatusMessage)
 
-    fetchEvents()
-    .then(events => {
-        // Pick events from between given start and end times.
-        // Group events by type/title.
-        // Calculate total hours per group -> add to PDF.
-        // Calculate total hours -> add to PDF.
+    auth.userManager.getUser()
+    .then(user => {
+        if (user == null) {
+            updateStatusMessage("Couldn't load logged in user data. Try again later or contact the administrator.")
+            return
+        }
 
-        let eventTypeHours = {}
+        fetchEventsWithUser(user)
+        .then(events => {
+            let eventTypeHours = {}
+            let totalHours = 0
+            const headers = [ "Tapahtuma", "Tunnit" ]
 
-        for (let i = 0; i < events.length; i++) {
-            const event = events[i] as CalendarEventModel
-            const startDate = new Date(event.startDateTime)
-            const endDate = new Date(event.endDateTime)
-            // @ts-expect-error
-            const diffMs = endDate - startDate
-            const diffHours = Math.ceil(diffMs) / 1000 / 60 / 60
-
-            if (Object.hasOwn(eventTypeHours, event.title)) {
+            for (let i = 0; i < events.length; i++) {
+                const event = events[i] as CalendarEventModel
+                const startDate = new Date(event.startDateTime)
+                const endDate = new Date(event.endDateTime)
                 // @ts-expect-error
-                eventTypeHours[event.title] += diffHours
+                const diffMs = endDate - startDate
+                const diffHours = diffMs / 1000 / 60 / 60
+
+                totalHours += diffHours
+
+                if (Object.hasOwn(eventTypeHours, event.title)) {
+                    // @ts-expect-error
+                    eventTypeHours[event.title] += diffHours
+                }
+                else {
+                    Object.defineProperty(eventTypeHours, event.title, {
+                        value: diffHours,
+                        writable: true
+                    })
+                }
+            }
+
+            Object.defineProperty(eventTypeHours, "Tunnit yhteensä", {
+                value: totalHours,
+                writable: true
+            })
+
+            var keys = Object.getOwnPropertyNames(eventTypeHours)
+
+            for (let i = 0; i < keys.length; i++) {
+                // @ts-expect-error
+                const hours = eventTypeHours[keys[i]]
+                // @ts-expect-error
+                eventTypeHours[keys[i]] = hours.toString()
+            }
+
+            function createHeaders(keys: string[]) {
+                var result = [];
+
+                for (var i = 0; i < keys.length; i += 1) {
+                    result.push({
+                        id: keys[i],
+                        name: keys[i],
+                        prompt: keys[i],
+                        width: 65,
+                        align: "center",
+                        padding: 0
+                    });
+                }
+
+                return result;
+            }
+
+            var headerObjects = createHeaders(headers);
+            const data = Object.getOwnPropertyNames(eventTypeHours).map(prop => {
+                return {
+                    Tapahtuma: prop,
+                    // @ts-expect-error
+                    Tunnit: eventTypeHours[prop]
+                };
+            })
+
+            var doc = new jsPDF();
+
+            doc.text("Toteutetut työtunnit", 5, 10)
+
+            let identifier
+
+            if (user.profile.preferred_username) {
+                identifier = user.profile.preferred_username
             }
             else {
-                Object.defineProperty(eventTypeHours, event.title, {
-                    value: diffHours,
-                    writable: true
-                })
-            }
-        }
-
-        var keys = Object.getOwnPropertyNames(eventTypeHours)
-
-        for (let i = 0; i < keys.length; i++) {
-            // @ts-expect-error
-            const hours = eventTypeHours[keys[i]]
-            // @ts-expect-error
-            eventTypeHours[keys[i]] = hours.toString()
-        }
-
-        function createHeaders(keys: string[]) {
-            var result = [];
-
-            for (var i = 0; i < keys.length; i += 1) {
-                result.push({
-                    id: keys[i],
-                    name: keys[i],
-                    prompt: keys[i],
-                    width: 65,
-                    align: "center",
-                    padding: 0
-                });
+                identifier = "Unkown"
             }
 
-            return result;
-        }
+            doc.text(identifier, 5, 20)
 
-        var headers = createHeaders(keys);
-        var data = [eventTypeHours]
-
-        var doc = new jsPDF();
-        // @ts-expect-error
-        doc.table(5, 5, data, headers);
-        doc.save("test.pdf")
+            // @ts-expect-error
+            doc.table(5, 30, data, headerObjects);
+            doc.save("test.pdf")
+        })
+        .catch(_ => {
+            updateStatusMessage("Failed to export PDF. Try again later or contact the administrator.")
+        })
     })
-    .catch(reason => {
-        updateStatusMessage("Failed to export PDF. Try again later or contact the administrator.")
-        throw reason
+    .catch(_ => {
+        updateStatusMessage("Couldn't load logged in user data. Try again later or contact the administrator.")
     })
 }
 

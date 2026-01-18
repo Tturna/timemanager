@@ -3,10 +3,12 @@ import type { RefObject } from "react"
 import type { CalendarEventModel } from "../types/api_schema"
 import type { AddEventFn, UpdateCalendarInterfaceEventsFn } from "./types/calendar_helper_types"
 import auth from "../auth/auth"
+import type { User } from "oidc-client-ts"
 
 function useCalendarEvents(updateStatusMessage: (message: string) => void) :
 {
     fetchEvents: (failureCallback?: () => void) => Promise<CalendarEventModel[]>,
+    fetchEventsWithUser: (user: User, failureCallback?: () => void) => Promise<CalendarEventModel[]>,
     updateCalendarInterfaceEvents: UpdateCalendarInterfaceEventsFn,
     addEvent: AddEventFn,
     syncEventToBackend: (event: CalendarEvent) => Promise<boolean>,
@@ -110,6 +112,25 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
         })
     }
 
+    const fetchEventsWithUser = (user: User, failureCallback?: () => void) => {
+        const requestOptions: RequestInit = {
+            headers: {
+                Authorization: `Bearer ${user.access_token}`
+            }
+        }
+
+        return fetch("http://localhost:5167/api/calendar/events", requestOptions)
+        .then((response: Response) => response.json())
+        .then((events: CalendarEventModel[]) => {
+            return events
+        })
+        .catch(_ => {
+            updateStatusMessage("Failed to get events. Try again later or contact the administrator.")
+            if (failureCallback) failureCallback()
+            throw new Error("Failed to get events. Try again later or contact the administrator.")
+        })
+    }
+
     const fetchEvents = (failureCallback?: () => void) => {
         const promise: Promise<CalendarEventModel[]> = new Promise((resolve, reject) => {
             auth.userManager.getUser()
@@ -121,22 +142,12 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
                     return
                 }
 
-                const requestOptions: RequestInit = {
-                    headers: {
-                        Authorization: `Bearer ${user.access_token}`
-                    }
-                }
-
-                fetch("http://localhost:5167/api/calendar/events", requestOptions)
-                .then((response: Response) => response.json())
-                .then((events: CalendarEventModel[]) => {
+                fetchEventsWithUser(user, failureCallback)
+                .then(events => {
                     resolve(events)
-                    return
                 })
-                .catch(_ => {
-                    updateStatusMessage("Failed to get events. Try again later or contact the administrator.")
-                    if (failureCallback) failureCallback()
-                    reject("Failed to get events. Try again later or contact the administrator.")
+                .catch(error => {
+                    reject(error)
                     return
                 })
             })
@@ -206,7 +217,8 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
         })
     }
 
-    return { fetchEvents, updateCalendarInterfaceEvents, addEvent, syncEventToBackend, deleteEvent }
+    return { fetchEvents, fetchEventsWithUser, updateCalendarInterfaceEvents, addEvent,
+        syncEventToBackend, deleteEvent }
 }
 
 export default useCalendarEvents
