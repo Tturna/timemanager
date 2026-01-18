@@ -218,11 +218,12 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
                 <form className="event-form" onSubmit={handleSubmit}>
                     <label className="form-group">
                         <span>Event Type</span>
-                        <select name="eventType" defaultValue={initialTitle}>
+                        <input name="eventType" type="text" list="existingTypeOptions" defaultValue={initialTitle} />
+                        <datalist id="existingTypeOptions">
                             <option value="lecture">Lecture</option>
                             <option value="meeting">Meeting</option>
                             <option value="whatever">Whatever</option>
-                        </select>
+                        </datalist>
                     </label>
 
                     <div className="modal-form-dateselector-container">
