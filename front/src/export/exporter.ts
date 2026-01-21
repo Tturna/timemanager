@@ -3,7 +3,7 @@ import useCalendarEvents from '../calendar/useCalendarEvents'
 import type { CalendarEventModel } from '../types/api_schema'
 import auth from '../auth/auth'
 
-function exportEventsPdf(updateStatusMessage: (message: string) => void) {
+function exportEventsPdf(updateStatusMessage: (message: string) => void, startDate: Date, endDate: Date) {
     const { fetchEventsWithUser } = useCalendarEvents(updateStatusMessage)
 
     auth.userManager.getUser()
@@ -13,7 +13,7 @@ function exportEventsPdf(updateStatusMessage: (message: string) => void) {
             return
         }
 
-        fetchEventsWithUser(user)
+        fetchEventsWithUser(user, undefined, startDate, endDate)
         .then(events => {
             let eventTypeHours = {}
             let totalHours = 0
@@ -83,7 +83,9 @@ function exportEventsPdf(updateStatusMessage: (message: string) => void) {
 
             var doc = new jsPDF();
 
-            doc.text("Toteutetut työtunnit", 5, 10)
+            const startDateString = startDate.toLocaleString("fi-FI").split(" ")[0]
+            const endDateString = endDate.toLocaleString("fi-FI").split(" ")[0]
+            doc.text(`Toteutuneet työtunnit ajalta ${startDateString} - ${endDateString}`, 5, 10)
 
             let identifier
 

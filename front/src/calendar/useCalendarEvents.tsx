@@ -8,7 +8,7 @@ import type { User } from "oidc-client-ts"
 function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
 {
     fetchEvents: (failureCallback?: () => void) => Promise<CalendarEventModel[]>,
-    fetchEventsWithUser: (user: User, failureCallback?: () => void) => Promise<CalendarEventModel[]>,
+    fetchEventsWithUser: (user: User, failureCallback?: () => void, startDateTime?: Date, endDateTime?: Date) => Promise<CalendarEventModel[]>,
     fetchEventTypes: () => Promise<EventTypeModel[]>,
     updateCalendarInterfaceEvents: UpdateCalendarInterfaceEventsFn,
     addEvent: AddEventFn,
@@ -129,14 +129,33 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
         })
     }
 
-    const fetchEventsWithUser = (user: User, failureCallback?: () => void) => {
+    const fetchEventsWithUser = (user: User, failureCallback?: () => void, startDateTime?: Date, endDateTime?: Date) => {
         const requestOptions: RequestInit = {
             headers: {
                 Authorization: `Bearer ${user.access_token}`
             }
         }
 
-        return fetch("http://localhost:5167/api/calendar/events", requestOptions)
+        let queryParams = ""
+
+        if (startDateTime) {
+            queryParams += `?startDateTime=${startDateTime.toISOString().slice(0, 10)}`
+        }
+
+        if (endDateTime) {
+            if (queryParams.length > 0) {
+                queryParams += "&endDateTime="
+            }
+            else {
+                queryParams += "?endDateTime="
+            }
+
+            queryParams += endDateTime.toISOString().slice(0, 10)
+        }
+
+        const uri = "http://localhost:5167/api/calendar/events" + queryParams
+
+        return fetch(uri, requestOptions)
         .then((response: Response) => response.json())
         .then((events: CalendarEventModel[]) => {
             return events

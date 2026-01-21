@@ -27,15 +27,23 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
 
     [HttpGet]
     [Authorize]
-    public ActionResult<IEnumerable<CalendarEventModel>> Events()
+    public ActionResult<IEnumerable<CalendarEventModel>> Events([FromQuery] DateTime? startDateTime, [FromQuery] DateTime? endDateTime)
     {
         if (!TryGetUserId(out var userId))
         {
             return new ForbidResult();
         }
 
+        startDateTime ??= DateTime.MinValue;
+        endDateTime ??= DateTime.MaxValue;
+
+        startDateTime = DateTime.SpecifyKind((DateTime)startDateTime, DateTimeKind.Utc);
+        endDateTime = DateTime.SpecifyKind((DateTime)endDateTime, DateTimeKind.Utc);
+
         var userEvents = dbContext.CalendarEvents
             .Where(cEvent => cEvent.UserId == userId)
+            .Where(cEvent => cEvent.StartDateTime >= startDateTime)
+            .Where(cEvent => cEvent.EndDateTime <= endDateTime)
             .Include(cEvent => cEvent.EventType);
 
         return new JsonResult(userEvents);
