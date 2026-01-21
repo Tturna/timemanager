@@ -29,12 +29,12 @@ function exportEventsPdf(updateStatusMessage: (message: string) => void) {
 
                 totalHours += diffHours
 
-                if (Object.hasOwn(eventTypeHours, event.title)) {
+                if (Object.hasOwn(eventTypeHours, event.eventType.name)) {
                     // @ts-expect-error
                     eventTypeHours[event.title] += diffHours
                 }
                 else {
-                    Object.defineProperty(eventTypeHours, event.title, {
+                    Object.defineProperty(eventTypeHours, event.eventType.name, {
                         value: diffHours,
                         writable: true
                     })

@@ -5,7 +5,7 @@ import type { AddEventFn, UpdateCalendarInterfaceEventsFn } from "./types/calend
 import auth from "../auth/auth"
 import type { User } from "oidc-client-ts"
 
-function useCalendarEvents(updateStatusMessage: (message: string) => void) :
+function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
 {
     fetchEvents: (failureCallback?: () => void) => Promise<CalendarEventModel[]>,
     fetchEventsWithUser: (user: User, failureCallback?: () => void) => Promise<CalendarEventModel[]>,
@@ -26,7 +26,10 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
         .then(user => {
             if (user == null) {
                 // User probably not authenticated
-                updateStatusMessage("You must sign in to add events")
+                if (updateStatusMessage) {
+                    updateStatusMessage("You must sign in to add events")
+                }
+
                 return
             }
 
@@ -67,11 +70,15 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
                         calendarRef.current.addEvent(newEvent)
                 })
                 .catch(_ => {
-                    updateStatusMessage("Failed to add event. Try again later or contact the administrator.")
+                    if (updateStatusMessage) {
+                        updateStatusMessage("Failed to add event. Try again later or contact the administrator.")
+                    }
                 })
         })
         .catch(_ => {
-            updateStatusMessage("Couldn't load logged in user data.")
+            if (updateStatusMessage) {
+                updateStatusMessage("Couldn't load logged in user data.")
+            }
         })
 
         calendarRef.current.unselect()
@@ -81,7 +88,10 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
         return auth.userManager.getUser()
         .then(user => {
             if (user == null) {
-                updateStatusMessage("Couldn't load logged in user data.")
+                if (updateStatusMessage) {
+                    updateStatusMessage("Couldn't load logged in user data.")
+                }
+
                 return false
             }
 
@@ -103,12 +113,18 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
                 return true
             })
             .catch(_ => {
-                updateStatusMessage("Failed to update events. Try again later or contact the administrator.")
+                if (updateStatusMessage) {
+                    updateStatusMessage("Failed to update events. Try again later or contact the administrator.")
+                }
+
                 return false
             })
         })
         .catch(_ => {
-            updateStatusMessage("Couldn't load logged in user data.")
+            if (updateStatusMessage) {
+                updateStatusMessage("Couldn't load logged in user data.")
+            }
+
             return false
         })
     }
@@ -126,7 +142,10 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
             return events
         })
         .catch(_ => {
-            updateStatusMessage("Failed to get events. Try again later or contact the administrator.")
+            if (updateStatusMessage) {
+                updateStatusMessage("Failed to get events. Try again later or contact the administrator.")
+            }
+
             if (failureCallback) failureCallback()
             throw new Error("Failed to get events. Try again later or contact the administrator.")
         })
@@ -153,7 +172,10 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
                 })
             })
             .catch(_ => {
-                updateStatusMessage("Couldn't load logged in user data.")
+                if (updateStatusMessage) {
+                    updateStatusMessage("Couldn't load logged in user data.")
+                }
+
                 if (failureCallback) failureCallback()
                 reject("Couldn't load logged in user data.")
                 return
@@ -168,7 +190,10 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
             auth.userManager.getUser()
             .then(user => {
                 if (user == null) {
-                    updateStatusMessage("Couldn't load logged in user data.")
+                    if (updateStatusMessage) {
+                        updateStatusMessage("Couldn't load logged in user data.")
+                    }
+
                     reject("Couldn't load logged in user data.")
                     return
                 }
@@ -185,13 +210,19 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
                     resolve(eventTypes)
                 })
                 .catch(_ => {
-                    updateStatusMessage("Failed to get event types. Try again later or contact the administrator.")
+                    if (updateStatusMessage) {
+                        updateStatusMessage("Failed to get event types. Try again later or contact the administrator.")
+                    }
+
                     reject("Failed to get event types. Try again later or contact the administrator.")
                 })
 
             })
             .catch(_ => {
-                updateStatusMessage("Couldn't load logged in user data.")
+                if (updateStatusMessage) {
+                    updateStatusMessage("Couldn't load logged in user data.")
+                }
+
                 reject("Couldn't load logged in user data.")
             })
         })
@@ -242,12 +273,18 @@ function useCalendarEvents(updateStatusMessage: (message: string) => void) :
             return fetch(`http://localhost:5167/api/calendar/deleteevent/${id}`, options)
                 .then(_ => true)
             .catch(_ => {
-                updateStatusMessage("Failed to delete. Try again later or contact the administrator.")
+                if (updateStatusMessage) {
+                    updateStatusMessage("Failed to delete. Try again later or contact the administrator.")
+                }
+
                 return false
             })
         })
         .catch(_ => {
-            updateStatusMessage("Couldn't load logged in user data.")
+            if (updateStatusMessage) {
+                updateStatusMessage("Couldn't load logged in user data.")
+            }
+
             return false
         })
     }

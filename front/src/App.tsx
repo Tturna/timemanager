@@ -3,6 +3,7 @@ import './App.css'
 import auth from './auth/auth'
 import Home from './Home'
 import { useEffect, useState } from 'react'
+import Analytics from './analytics/Analytics'
 
 function App() {
     const [statusMessage, setStatusMessage] = useState("")
@@ -34,8 +35,14 @@ function App() {
                 <div>{statusMessage}</div>
             }
 
+            <nav>
+                <Link to="/">Home</Link>
+                <Link to="/analytics">Analytics</Link>
+            </nav>
+
             <Routes>
                 <Route path="/" element={<Home updateStatusMessage={updateStatusMessage} />} />
+                <Route path="/analytics" element={<Analytics updateStatusMessage={updateStatusMessage} />} />
                 <Route path="/openid/callback/" element={<auth.LoginCallback updateStatusMessage={updateStatusMessage} />} />
             </Routes>
         </BrowserRouter>
