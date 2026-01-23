@@ -97,6 +97,11 @@
     border-color: #3b82f6;
 }
 
+.form-group input[type="text"] {
+    box-sizing: border-box;
+    width: 300px;
+}
+
 /* Actions */
 .form-actions {
     display: flex;

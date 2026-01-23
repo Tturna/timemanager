@@ -3,7 +3,7 @@ import useCalendarEvents from '../calendar/useCalendarEvents'
 import type { CalendarEventModel } from '../types/api_schema'
 import auth from '../auth/auth'
 
-function exportEventsPdf(updateStatusMessage: (message: string) => void, startDate: Date, endDate: Date) {
+function exportEventsPdf(updateStatusMessage: (message: string) => void, startDate: Date, endDate: Date, fileName: string) {
     const { fetchEventsWithUser } = useCalendarEvents(updateStatusMessage)
 
     auth.userManager.getUser()
@@ -100,7 +100,7 @@ function exportEventsPdf(updateStatusMessage: (message: string) => void, startDa
 
             // @ts-expect-error
             doc.table(5, 30, data, headerObjects);
-            doc.save("test.pdf")
+            doc.save(fileName)
         })
         .catch(_ => {
             updateStatusMessage("Failed to export PDF. Try again later or contact the administrator.")

@@ -10,6 +10,7 @@ function ExportModal({ closeModal, updateStatusMessage, calendarRef }: {
     const modalRef = useRef<HTMLDivElement | null>(null)
     const startDateInputRef = useRef<HTMLInputElement | null>(null)
     const endDateInputRef = useRef<HTMLInputElement | null>(null)
+    const fileNameInputRef = useRef<HTMLInputElement | null>(null)
 
     useEffect(() => {
         const handler = (event: MouseEvent) => {
@@ -35,16 +36,20 @@ function ExportModal({ closeModal, updateStatusMessage, calendarRef }: {
     }, [])
 
     const handleSubmit = () => {
-        if (!startDateInputRef.current || !endDateInputRef.current) return
+        if (!startDateInputRef.current || !endDateInputRef.current || !fileNameInputRef.current) return
 
         const startDate = new Date(startDateInputRef.current.value)
         const endDate = new Date(endDateInputRef.current.value)
+        const fileName = fileNameInputRef.current.value
 
-        exporter.exportEventsPdf(updateStatusMessage, startDate, endDate)
+        exporter.exportEventsPdf(updateStatusMessage, startDate, endDate, fileName)
     }
 
     const initialStartDateTime = calendarRef.current.getView().currentStart
     const initialEndDateTime = calendarRef.current.getView().currentEnd
+    const initialStartDateString = initialStartDateTime.toISOString().slice(0, 10)
+    const initialEndDateString = initialEndDateTime.toISOString().slice(0, 10)
+    const defaultFileName = `tyotunnit_${initialStartDateString}_-_${initialEndDateString}.pdf`
 
     return (
         <div className="modal-overlay">
@@ -58,7 +63,7 @@ function ExportModal({ closeModal, updateStatusMessage, calendarRef }: {
                                 ref={startDateInputRef}
                                 type="date"
                                 name="startDate"
-                                defaultValue={initialStartDateTime.toISOString().slice(0, 10)}
+                                defaultValue={initialStartDateString}
                             />
                         </div>
                     </label>
@@ -70,7 +75,19 @@ function ExportModal({ closeModal, updateStatusMessage, calendarRef }: {
                                 ref={endDateInputRef}
                                 type="date"
                                 name="endDate"
-                                defaultValue={initialEndDateTime.toISOString().slice(0, 10)}
+                                defaultValue={initialEndDateString}
+                            />
+                        </div>
+                    </label>
+
+                    <label className="form-group">
+                        <span>File name</span>
+                        <div>
+                            <input
+                                ref={fileNameInputRef}
+                                type="text"
+                                name="fileName"
+                                defaultValue={defaultFileName}
                             />
                         </div>
                     </label>
