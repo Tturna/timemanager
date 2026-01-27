@@ -3,7 +3,13 @@ import useCalendarEvents from '../calendar/useCalendarEvents'
 import type { CalendarEventModel } from '../types/api_schema'
 import auth from '../auth/auth'
 
-function exportEventsPdf(updateStatusMessage: (message: string) => void, startDate: Date, endDate: Date, fileName: string) {
+function exportEventsPdf(
+    updateStatusMessage: (message: string) => void,
+    startDate: Date,
+    endDate: Date,
+    fileName: string,
+    userIdentifier: string
+) {
     const { fetchEventsWithUser } = useCalendarEvents(updateStatusMessage)
 
     auth.userManager.getUser()
@@ -87,16 +93,7 @@ function exportEventsPdf(updateStatusMessage: (message: string) => void, startDa
             const endDateString = endDate.toLocaleString("fi-FI").split(" ")[0]
             doc.text(`Toteutuneet työtunnit ajalta ${startDateString} - ${endDateString}`, 5, 10)
 
-            let identifier
-
-            if (user.profile.preferred_username) {
-                identifier = user.profile.preferred_username
-            }
-            else {
-                identifier = "Unkown"
-            }
-
-            doc.text(identifier, 5, 20)
+            doc.text(userIdentifier, 5, 20)
 
             // @ts-expect-error
             doc.table(5, 30, data, headerObjects);

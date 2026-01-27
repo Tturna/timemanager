@@ -102,6 +102,10 @@
     width: 300px;
 }
 
+.form-errors {
+    color: red;
+}
+
 /* Actions */
 .form-actions {
     display: flex;
