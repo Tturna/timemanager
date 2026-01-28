@@ -7,7 +7,7 @@ services:
       - 8080:80
     volumes:
       - ./proxy/nginx.conf:/etc/nginx/nginx.conf
-      - ../timemanager-front/dist:/app/dist
+      - ./front/dist:/app/dist
       - ./proxy/error.log:/var/log/nginx/error.log
       - ./proxy/proxy_debug.log:/var/log/nginx/proxy_debug.log
 
@@ -19,7 +19,7 @@ services:
       POSTGRES_USER: "testadmin"
       POSTGRES_DB: "timemanager"
     volumes:
-      - ./pgdata/:/var/lib/postgresql/data
+      - ../pgdata/:/var/lib/postgresql/data
     network_mode: host
     # temp. should run backend in the same net instead of exposing port
     ports:

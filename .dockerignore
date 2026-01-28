@@ -1,0 +1,3 @@
+*pgdata/
+.git/
+node_modules/
