@@ -1,4 +1,4 @@
-import { useState, useRef, type RefObject } from 'react';
+import { useState, useRef, type RefObject, useEffect } from 'react';
 import { type CalendarApi } from '@event-calendar/core'
 
 // Import CSS if your build tool supports it
@@ -33,22 +33,38 @@ function Calendar({ updateStatusMessage } : { updateStatusMessage: (message: str
         setIsExporting(true)
     }
 
-    // Buttons are added to calendar as options in useCalendar. This is required to
-    // populate the buttons.
-    if (calendarParentRef.current) {
-        const addEventButton = calendarParentRef.current.getElementsByClassName("ec-add")[0]
-        const exportButton = calendarParentRef.current.getElementsByClassName("ec-export")[0]
+    useEffect(() => {
+        // Buttons are added to calendar as options in useCalendar. This is required to
+        // populate the buttons.
+        let addEventButton: Element | undefined 
+        let exportButton: Element | undefined
+        const addEventHandler = () => openModal()
 
-        if (addEventButton) {
-            addEventButton.textContent = "Add Event"
-            addEventButton.addEventListener("click", () => openModal())
+        if (calendarParentRef.current) {
+            addEventButton = calendarParentRef.current.getElementsByClassName("ec-add")[0]
+            exportButton = calendarParentRef.current.getElementsByClassName("ec-export")[0]
+
+            if (addEventButton) {
+                addEventButton.textContent = "Add Event"
+                addEventButton.addEventListener("click", addEventHandler)
+            }
+
+            if (exportButton) {
+                exportButton.textContent = "Export PDF"
+                exportButton.addEventListener("click", handleExportPdf)
+            }
         }
 
-        if (exportButton) {
-            exportButton.textContent = "Export PDF"
-            exportButton.addEventListener("click", handleExportPdf)
+        return () => {
+            if (addEventButton) {
+                addEventButton.removeEventListener("click", addEventHandler)
+            }
+
+            if (exportButton) {
+                exportButton.removeEventListener("click", handleExportPdf)
+            }
         }
-    }
+    }, [calendarRef.current])
 
     return (
         <>
