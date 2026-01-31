@@ -1,13 +1,14 @@
 import { UserManager, type UserManagerSettings } from 'oidc-client-ts'
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { URLS } from '../util/urls'
 
 const userManagerSettings: UserManagerSettings = {
-    authority: "http://localhost/auth/realms/timemanager/protocol/openid-connect/auth",
+    authority: URLS.makeAuthorityUrl(),
     client_id: "public-client",
-    metadataUrl: "http://localhost/auth/realms/timemanager/.well-known/openid-configuration",
-    redirect_uri: "http://localhost/openid/callback",
-    post_logout_redirect_uri: "http://localhost/",
+    metadataUrl: URLS.makeMetadataUrl(),
+    redirect_uri: URLS.makePostLoginRedirectUrl(),
+    post_logout_redirect_uri: URLS.makePostLogoutRedirectUrl(),
     automaticSilentRenew: true
 }
 
@@ -16,7 +17,7 @@ const userManager = new UserManager(userManagerSettings)
 function handleLogin(updateStatusMessage: (message: string) => void) {
     // This fetch is effectively a pre-flight health check. This is used to set a status message
     // because signinRedirect() causes a full refresh, wiping React state.
-    fetch("http://localhost/auth/realms/timemanager/.well-known/openid-configuration")
+    fetch(URLS.makeMetadataUrl())
     .then((response: Response) => {
         if (!response.ok) {
             updateStatusMessage("Sign in failed. Try again later or contact the administrator.")

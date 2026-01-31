@@ -4,6 +4,7 @@ import type { CalendarEventModel, EventTypeModel } from "../types/api_schema"
 import type { AddEventFn, UpdateCalendarInterfaceEventsFn } from "./types/calendar_helper_types"
 import auth from "../auth/auth"
 import type { User } from "oidc-client-ts"
+import { URLS } from "../util/urls"
 
 function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
 {
@@ -46,7 +47,7 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
                 })
             }
 
-            fetch("http://localhost:5167/api/calendar/addevent", options)
+            fetch(URLS.makeAddEventUrl(), options)
                 .then((response: Response) => response.json())
                 .then((createdEvent: CalendarEventModel) => {
                     if (!calendarRef.current) return
@@ -108,7 +109,7 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
                 })
             }
 
-            return fetch(`http://localhost:5167/api/calendar/editevent/${event.id}`, options)
+            return fetch(URLS.makeEditEventUrl(event.id), options)
                 .then(_ => {
                 return true
             })
@@ -153,9 +154,7 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
             queryParams += endDateTime.toISOString().slice(0, 10)
         }
 
-        const uri = "http://localhost:5167/api/calendar/events" + queryParams
-
-        return fetch(uri, requestOptions)
+        return fetch(URLS.makeGetEventsUrl(queryParams), requestOptions)
         .then((response: Response) => response.json())
         .then((events: CalendarEventModel[]) => {
             return events
@@ -223,7 +222,7 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
                     }
                 }
 
-                fetch("http://localhost:5167/api/calendar/eventtypes", requestOptions)
+                fetch(URLS.makeGetEventTypesUrl(), requestOptions)
                 .then((response: Response) => response.json())
                 .then((eventTypes: EventTypeModel[]) => {
                     resolve(eventTypes)
@@ -289,7 +288,7 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
                 }
             }
 
-            return fetch(`http://localhost:5167/api/calendar/deleteevent/${id}`, options)
+            return fetch(URLS.makeDeleteEventUrl(id), options)
                 .then(_ => true)
             .catch(_ => {
                 if (updateStatusMessage) {

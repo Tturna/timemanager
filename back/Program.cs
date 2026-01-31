@@ -45,6 +45,21 @@ builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.Authenticati
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation(
+                context.Exception,
+                "JWT authentication failed. Path: {Path}",
+                context.HttpContext.Request.Path
+            );
+
+            return Task.CompletedTask;
+        }
+    };
 });
 
 var app = builder.Build();

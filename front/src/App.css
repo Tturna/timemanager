@@ -1,3 +1,8 @@
+.content {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
 #calendar {
     height: 80%;
 }
@@ -145,4 +150,97 @@
     display: flex;
     flex-direction: row;
     gap: 1em;
+}
+
+/* Navbar container */
+#navbar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 7px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Nav links */
+#navbar a {
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #374151;
+    padding: 6px 4px;
+    position: relative;
+    transition: color 0.2s ease;
+}
+
+/* Hover state */
+#navbar a:hover {
+    color: #111827;
+}
+
+/* Active / focus underline */
+#navbar a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 2px;
+    background: #3b82f6;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s ease;
+}
+
+#navbar a:hover::after,
+#navbar a:focus-visible::after {
+    transform: scaleX(1);
+}
+
+/* Accessibility focus */
+#navbar a:focus-visible {
+    outline: none;
+    color: #111827;
+}
+
+/* Push user element to the right */
+.userElement {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Username text */
+.userElement p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #374151;
+    white-space: nowrap;
+}
+
+/* Sign out button */
+.userElement button {
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    color: #374151;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Hover state */
+.userElement button:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+/* Focus state */
+.userElement button:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
 }

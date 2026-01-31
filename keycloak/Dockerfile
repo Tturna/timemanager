@@ -17,5 +17,5 @@ COPY --from=builder /opt/keycloak/ /opt/keycloak/
 COPY ./custom_start.sh /opt/keycloak/custom_start.sh
 
 # ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
-ENTRYPOINT []
-CMD ["/opt/keycloak/custom_start.sh"]
+ENTRYPOINT ["/opt/keycloak/custom_start.sh"]
+CMD []

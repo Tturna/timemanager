@@ -6,7 +6,8 @@ WORKDIR /app
 
 COPY ./front/. .
 
+RUN npm run build
+
 FROM nginx:1.27
 
 COPY --from=build /app/dist /app/dist
-COPY proxy/nginx.conf /etc/nginx/nginx.conf
