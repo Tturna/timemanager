@@ -33,11 +33,25 @@ function Calendar({ updateStatusMessage } : { updateStatusMessage: (message: str
         setIsExporting(true)
     }
 
+    // Buttons are added to calendar as options in useCalendar. This is required to
+    // populate the buttons.
+    if (calendarParentRef.current) {
+        const addEventButton = calendarParentRef.current.getElementsByClassName("ec-add")[0]
+        const exportButton = calendarParentRef.current.getElementsByClassName("ec-export")[0]
+
+        if (addEventButton) {
+            addEventButton.textContent = "Add Event"
+            addEventButton.addEventListener("click", () => openModal())
+        }
+
+        if (exportButton) {
+            exportButton.textContent = "Export PDF"
+            exportButton.addEventListener("click", handleExportPdf)
+        }
+    }
 
     return (
         <>
-        <button onClick={ () => openModal() }>Add</button>
-        <button onClick={handleExportPdf}>Export PDF</button>
         <div ref={calendarParentRef} id="calendar"></div>
         {
             isCreatingEvent &&

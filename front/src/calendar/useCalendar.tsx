@@ -89,7 +89,7 @@ function useCalendar(
                 eventResize: handleEventResize,
                 eventClick: handleEventClick,
                 theme: setCalendarStyling,
-                headerToolbar: { start: "title today prev,next", center: "", end: ""}
+                headerToolbar: { start: "title today prev,next add export", center: "", end: ""}
             }
         );
 

@@ -45,6 +45,7 @@ function Navbar({ updateStatusMessage } : { updateStatusMessage: (message: strin
     return (
         <>
         <nav id="navbar">
+            <h1>Timepad</h1>
             <Link to="/">Home</Link>
             <Link to="/analytics">Analytics</Link>
             <div className="userElement">{userElement}</div>
