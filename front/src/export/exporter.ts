@@ -37,7 +37,7 @@ function exportEventsPdf(
 
                 if (Object.hasOwn(eventTypeHours, event.eventType.name)) {
                     // @ts-expect-error
-                    eventTypeHours[event.title] += diffHours
+                    eventTypeHours[event.eventType.name] += diffHours
                 }
                 else {
                     Object.defineProperty(eventTypeHours, event.eventType.name, {
