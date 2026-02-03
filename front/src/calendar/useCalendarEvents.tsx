@@ -65,7 +65,7 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
                             startEditable: true,
                             durationEditable: true,
                             display: "auto" as DisplayMode,
-                            backgroundColor: cssColor,
+                            backgroundColor: createdEvent.cssColor,
                             classNames: [],
                             styles: [],
                             extendedProps: []

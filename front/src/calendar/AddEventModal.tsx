@@ -52,14 +52,13 @@ function getEventDataFromFormData(data: FormData) {
     const endDateString = data.get("endDate") as string
     const startDateTimeString = data.get("startTime") as string
     const endDateTimeString = data.get("endTime") as string
-    const eventColor = data.get("eventColor") as string
+    const eventColor = data.get("eventColor") as string | undefined
 
     if (typeof(title) !== "string" ||
         typeof(startDateString) !== "string" ||
         typeof(endDateString) !== "string" ||
         typeof(startDateTimeString) !== "string" ||
-        typeof(endDateTimeString) !== "string" ||
-        typeof(eventColor) !== "string"
+        typeof(endDateTimeString) !== "string"
     ) {
         throw new Error("Invalid form data!")
     }
@@ -290,10 +289,13 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
                             </div>
                         </label>
 
-                        <label className="form-group">
-                            <span>Color</span>
-                            <input type="color" name="eventColor" defaultValue={initialCssColor} />
-                        </label>
+                        {
+                            eventToEdit &&
+                            <label className="form-group">
+                                <span>Color</span>
+                                <input type="color" name="eventColor" defaultValue={initialCssColor} />
+                            </label>
+                        }
                     </div>
 
                     <div className="form-actions">

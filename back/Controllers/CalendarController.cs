@@ -84,6 +84,44 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
 
         var eventType = dbContext.CalendarEventTypes.FirstOrDefault((EventTypeModel cEvent) => cEvent.Name == newEventDto.Title);
         var newEventTypeAdded = false;
+        string eventColor;
+
+        if (newEventDto.CssColor is not null)
+        {
+            eventColor = newEventDto.CssColor;
+        }
+        else
+        {
+            HashSet<string> newEventColorOptions = [
+                "#0099db",
+                "#d77643",
+                "#b86f50",
+                "#e43b44",
+                "#feae34",
+                "#63c74d",
+                "#3e8948",
+                "#5a6988",
+                "#b55088",
+                "#f6757a"
+            ];
+
+            eventColor = newEventColorOptions.First();
+
+            foreach (var cEvent in dbContext.CalendarEvents)
+            {
+                if (newEventColorOptions.Contains(cEvent.CssColor))
+                {
+                    newEventColorOptions.Remove(cEvent.CssColor);
+                }
+
+                if (newEventColorOptions.Count == 0) break;
+            }
+
+            if (newEventColorOptions.Count > 0)
+            {
+                eventColor = newEventColorOptions.First();
+            }
+        }
 
         if (eventType is null)
         {
@@ -95,6 +133,11 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
                 Name = newEventDto.Title
             };
         }
+        else
+        {
+            var firstSimilarEvent = dbContext.CalendarEvents.First(e => e.EventType == eventType);
+            eventColor = firstSimilarEvent.CssColor;
+        }
 
         var newEvent = new CalendarEventModel()
         {
@@ -105,9 +148,9 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
             EndDateTime = endDateTime
         };
 
-        if (newEventDto.CssColor is not null)
+        if (eventColor is not null)
         {
-            newEvent.CssColor = newEventDto.CssColor;
+            newEvent.CssColor = eventColor;
         }
 
         try
