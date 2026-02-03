@@ -8,4 +8,5 @@ public class NewEventDto
     public DateTime StartDateTime { get; set; }
     [Required]
     public DateTime EndDateTime { get; set; }
+    public string? CssColor { get; set; }
 }

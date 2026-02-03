@@ -105,6 +105,11 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
             EndDateTime = endDateTime
         };
 
+        if (newEventDto.CssColor is not null)
+        {
+            newEvent.CssColor = newEventDto.CssColor;
+        }
+
         try
         {
             dbContext.CalendarEvents.Add(newEvent);
@@ -182,6 +187,24 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
         eventToEdit.EventType = eventType;
         eventToEdit.StartDateTime = newStartDateTime;
         eventToEdit.EndDateTime = newEndDateTime;
+
+        if (newEventDto.CssColor is not null)
+        {
+            if (eventToEdit.CssColor != newEventDto.CssColor)
+            {
+                // Event color was updated. Update color for all event instances.
+                var allEvents = dbContext.CalendarEvents.Where(e => e.EventType == eventToEdit.EventType);
+
+                foreach (var cEvent in allEvents)
+                {
+                    cEvent.CssColor = newEventDto.CssColor;
+                }
+            }
+            else
+            {
+                eventToEdit.CssColor = newEventDto.CssColor;
+            }
+        }
 
         if (newEventTypeAdded)
         {

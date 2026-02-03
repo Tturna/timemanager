@@ -13,7 +13,10 @@ export interface paths {
         };
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    startDateTime?: string;
+                    endDateTime?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -210,6 +213,7 @@ export interface components {
             startDateTime: string;
             /** Format: date-time */
             endDateTime: string;
+            cssColor?: string;
         };
         EventTypeModel: {
             /** Format: uuid */
@@ -222,6 +226,7 @@ export interface components {
             startDateTime: string;
             /** Format: date-time */
             endDateTime: string;
+            cssColor?: null | string;
         };
     };
     responses: never;

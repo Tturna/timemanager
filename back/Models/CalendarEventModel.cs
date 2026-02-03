@@ -14,4 +14,5 @@ public sealed record class CalendarEventModel
     public DateTime StartDateTime { get; set; }
     [Required]
     public DateTime EndDateTime { get; set; }
+    public string CssColor { get; set; } = "#0099db";
 }

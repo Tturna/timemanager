@@ -18,10 +18,15 @@ function getInitialEventData(calendar: CalendarApi, eventToEdit: CalendarEvent |
 
     let initialStartDateTime: Date
     let initialEndDateTime: Date
+    let initialCssColor = "#0099db"
 
     if (eventToEdit) {
         initialStartDateTime = new Date(eventToEdit.start)
         initialEndDateTime = new Date(eventToEdit.end)
+
+        if (eventToEdit.backgroundColor) {
+            initialCssColor = eventToEdit.backgroundColor
+        }
     }
     else if (selectionInfo) {
         initialStartDateTime = new Date(selectionInfo.start)
@@ -38,7 +43,7 @@ function getInitialEventData(calendar: CalendarApi, eventToEdit: CalendarEvent |
         initialEndDateTime.setHours(initialEndDateTime.getHours() + 1)
     }
 
-    return { initialTitle, initialStartDateTime, initialEndDateTime }
+    return { initialTitle, initialStartDateTime, initialEndDateTime, initialCssColor }
 }
 
 function getEventDataFromFormData(data: FormData) {
@@ -47,12 +52,14 @@ function getEventDataFromFormData(data: FormData) {
     const endDateString = data.get("endDate") as string
     const startDateTimeString = data.get("startTime") as string
     const endDateTimeString = data.get("endTime") as string
+    const eventColor = data.get("eventColor") as string
 
     if (typeof(title) !== "string" ||
         typeof(startDateString) !== "string" ||
         typeof(endDateString) !== "string" ||
         typeof(startDateTimeString) !== "string" ||
-        typeof(endDateTimeString) !== "string"
+        typeof(endDateTimeString) !== "string" ||
+        typeof(eventColor) !== "string"
     ) {
         throw new Error("Invalid form data!")
     }
@@ -66,7 +73,7 @@ function getEventDataFromFormData(data: FormData) {
     endDateTime.setMonth(endDate.getMonth())
     endDateTime.setDate(endDate.getDate())
 
-    return { title, startDateTime, endDateTime }
+    return { title, startDateTime, endDateTime, eventColor }
 }
 
 function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, updateStatusMessage }:
@@ -89,7 +96,7 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
     const modalRef = useRef<HTMLDivElement | null>(null)
     const [existingEventTypes, setExistingEventTypes] = useState<EventTypeModel[] | null>(null)
     const { fetchEventTypes, addEvent, syncEventToBackend, deleteEvent } = useCalendarEvents(updateStatusMessage)
-    const { initialTitle, initialStartDateTime, initialEndDateTime } = getInitialEventData(calendar, eventToEdit, selectionInfo)
+    const { initialTitle, initialStartDateTime, initialEndDateTime, initialCssColor } = getInitialEventData(calendar, eventToEdit, selectionInfo)
 
     const timeOptionElements = useMemo(() => {
         let hours = 0
@@ -120,14 +127,15 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const data = new FormData(event.currentTarget)
-        const { title, startDateTime, endDateTime } = getEventDataFromFormData(data)
+        const { title, startDateTime, endDateTime, eventColor } = getEventDataFromFormData(data)
 
         if (eventToEdit) {
             const editedEvent = {
                 ...eventToEdit,
                 title,
                 start: startDateTime,
-                end: endDateTime
+                end: endDateTime,
+                backgroundColor: eventColor
             }
 
             syncEventToBackend(editedEvent)
@@ -144,7 +152,7 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
             })
         }
         else {
-            addEvent(calendarRef, title, startDateTime, endDateTime)
+            addEvent(calendarRef, title, startDateTime, endDateTime, eventColor)
 
             if (existingEventTypes) {
                 // use the length of the array as a temp ID
@@ -280,6 +288,11 @@ function AddEventModal({ closeModal, calendarRef, selectionInfo, eventToEdit, up
                                 { timeOptionElements }
                                 </select>
                             </div>
+                        </label>
+
+                        <label className="form-group">
+                            <span>Color</span>
+                            <input type="color" name="eventColor" defaultValue={initialCssColor} />
                         </label>
                     </div>
 

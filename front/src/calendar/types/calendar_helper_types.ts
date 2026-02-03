@@ -11,5 +11,6 @@ export type AddEventFn = (
     calendarRef: RefObject<CalendarApi | null>,
     title: string,
     start: Date,
-    end: Date
+    end: Date,
+    cssColor?: string
 ) => void

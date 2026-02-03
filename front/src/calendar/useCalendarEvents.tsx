@@ -19,7 +19,8 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
     const addEvent: AddEventFn = (
         calendarRef: RefObject<CalendarApi | null>,
         title: string,
-        start: Date, end: Date
+        start: Date, end: Date,
+        cssColor?: string
     ) => {
         if (!calendarRef.current) return
 
@@ -43,7 +44,8 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
                 body: JSON.stringify({
                     title,
                     startDateTime: start.toISOString(),
-                    endDateTime: end.toISOString()
+                    endDateTime: end.toISOString(),
+                    cssColor
                 })
             }
 
@@ -63,6 +65,7 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
                             startEditable: true,
                             durationEditable: true,
                             display: "auto" as DisplayMode,
+                            backgroundColor: cssColor,
                             classNames: [],
                             styles: [],
                             extendedProps: []
@@ -105,7 +108,8 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
                 body: JSON.stringify({
                     title: event.title,
                     startDateTime: event.start.toISOString(),
-                    endDateTime: event.end.toISOString()
+                    endDateTime: event.end.toISOString(),
+                    cssColor: event.backgroundColor
                 })
             }
 
@@ -266,6 +270,7 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
                     durationEditable: true,
                     display: "auto" as DisplayMode,
                     classNames: [],
+                    backgroundColor: event.cssColor,
                     styles: [],
                     extendedProps: []
                 } as CalendarEvent
