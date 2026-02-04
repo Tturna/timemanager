@@ -44,7 +44,7 @@ function App() {
 
                 <Routes>
                     <Route path="/" element={<Home updateStatusMessage={updateStatusMessage} user={user} setUser={setUser} />} />
-                    <Route path="/analytics" element={<Analytics updateStatusMessage={updateStatusMessage} />} />
+                    <Route path="/analytics" element={<Analytics updateStatusMessage={updateStatusMessage} user={user} setUser={setUser} />} />
                     <Route path="/openid/callback/" element={<auth.LoginCallback updateStatusMessage={updateStatusMessage} />} />
                 </Routes>
             </div>

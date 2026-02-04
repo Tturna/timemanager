@@ -1,7 +1,14 @@
 import { useEffect, useState, type ReactElement } from "react"
 import { getEventTypeHours, getEventTypePercentages } from "./useAnalytics"
+import useAuthCheck from "../auth/useAuthCheck"
+import type { User } from "oidc-client-ts"
 
-function Analytics({ updateStatusMessage }: { updateStatusMessage: (message:string) => void }) {
+function Analytics(props: {
+    updateStatusMessage: (message:string) => void,
+    user: User | null,
+    setUser: React.Dispatch<React.SetStateAction<User | null>>
+}) {
+    useAuthCheck(props)
     const [eventTypeHours, setEventTypeHours] = useState<{} | null>(null)
     const [eventTypePercentages, setEventTypePercentages] = useState<{} | null>(null)
 
@@ -11,7 +18,7 @@ function Analytics({ updateStatusMessage }: { updateStatusMessage: (message:stri
             setEventTypeHours(eth)
         })
         .catch(_ => {
-            updateStatusMessage("Failed to load event data. Try again later or contact the administrator.")
+            props.updateStatusMessage("Failed to load event data. Try again later or contact the administrator.")
         })
 
         getEventTypePercentages()
@@ -19,9 +26,13 @@ function Analytics({ updateStatusMessage }: { updateStatusMessage: (message:stri
             setEventTypePercentages(etp)
         })
         .catch(_ => {
-            updateStatusMessage("Failed to load event data. Try again later or contact the administrator.")
+            props.updateStatusMessage("Failed to load event data. Try again later or contact the administrator.")
         })
     }, [])
+
+    if (!props.user) {
+        return <p>Redirecting...</p>
+    }
 
     let eventHourElements: ReactElement[] = []
     let eventPercentageElements: ReactElement[] = []
