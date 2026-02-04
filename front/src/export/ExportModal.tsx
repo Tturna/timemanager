@@ -69,7 +69,6 @@ function ExportModal({ closeModal, updateStatusMessage, calendarRef }: {
         }
 
         if (failed) {
-            console.log("fail")
             return
         }
 

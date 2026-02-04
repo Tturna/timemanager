@@ -5,9 +5,11 @@ import Home from './Home'
 import { useEffect, useState } from 'react'
 import Analytics from './analytics/Analytics'
 import Navbar from './Navbar'
+import type { User } from 'oidc-client-ts'
 
 function App() {
     const [statusMessage, setStatusMessage] = useState("")
+    const [user, setUser] = useState<User | null>(null)
 
     const updateStatusMessage = (message: string) => {
         let newMessage = message;
@@ -29,9 +31,10 @@ function App() {
         }
     }, [statusMessage])
 
+
     return (
         <BrowserRouter>
-            <Navbar updateStatusMessage={updateStatusMessage} />
+            <Navbar user={user} />
 
             <div className="content">
                 {
@@ -40,7 +43,7 @@ function App() {
                 }
 
                 <Routes>
-                    <Route path="/" element={<Home updateStatusMessage={updateStatusMessage} />} />
+                    <Route path="/" element={<Home updateStatusMessage={updateStatusMessage} user={user} setUser={setUser} />} />
                     <Route path="/analytics" element={<Analytics updateStatusMessage={updateStatusMessage} />} />
                     <Route path="/openid/callback/" element={<auth.LoginCallback updateStatusMessage={updateStatusMessage} />} />
                 </Routes>
