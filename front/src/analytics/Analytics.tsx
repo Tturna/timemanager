@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ReactElement } from "react"
 import { getEventTypeHours, getEventTypePercentages } from "./useAnalytics"
 import useAuthCheck from "../auth/useAuthCheck"
 import type { User } from "oidc-client-ts"
@@ -49,12 +49,20 @@ function Analytics(props: {
     let eventHours: number[] = []
     let eventPercentages: number[] = []
     let eventColors: string[] = []
+    let eventTableRows: ReactElement[] = []
 
     eventTypes.forEach(key => {
         const perc = Math.round((eventTypePercentages[key]! * 100 + Number.EPSILON) * 100) / 100 
-        eventHours.push(Number(eventTypeHoursResult.eventTypeHours[key]!.hours))
+        const hours = Number(eventTypeHoursResult.eventTypeHours[key]!.hours)
+        eventHours.push(hours)
         eventPercentages.push(perc)
         eventColors.push(eventTypeHoursResult.eventTypeHours[key]!.color)
+
+        eventTableRows.push(
+            <tr>
+                <td>{key}</td><td>{hours} hours</td><td>{perc} %</td>
+            </tr>
+        )
     })
 
     const eventHourDoughnutData = {
@@ -79,8 +87,32 @@ function Analytics(props: {
         <>
         <h1>Analytics</h1>
         <h2>Events</h2>
-        <div className="charts">
-            <Doughnut data={eventHourDoughnutData} />
+        <div className="analytics">
+            <div>
+                <div className="table-container">
+                    <table>
+                    <tr>
+                    <th>Event</th><th>Hours</th><th>Percentage %</th>
+                    </tr>
+                    { eventTableRows }
+                    <tr>
+                    <td>
+                        <strong>Total time</strong>
+                    </td>
+                        <td><strong>{eventTypeHoursResult.totalHours} hours</strong>
+                    </td>
+                    <td>
+                        <strong>100 %</strong>
+                    </td>
+                    </tr>
+                    </table>
+                </div>
+            </div>
+            <div>
+                <div className="charts">
+                    <Doughnut data={eventHourDoughnutData} />
+                </div>
+            </div>
         </div>
         </>
     )
