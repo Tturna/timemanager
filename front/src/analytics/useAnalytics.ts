@@ -1,11 +1,12 @@
 import auth from "../auth/auth"
 import useCalendarEvents from "../calendar/useCalendarEvents"
 import type { CalendarEventModel } from "../types/api_schema"
+import type { EventTypeHoursResult } from "./types/analyticsTypes"
 
 export function getEventTypeHours() {
     const { fetchEventsWithUser } = useCalendarEvents()
 
-    return new Promise<{}>((resolve, reject) => {
+    return new Promise<EventTypeHoursResult>((resolve, reject) => {
         auth.userManager.getUser()
         .then(user => {
             if (user == null) {
@@ -40,11 +41,6 @@ export function getEventTypeHours() {
                     }
                 }
 
-                Object.defineProperty(eventTypeHours, "Tunnit yhteensä", {
-                    value: totalHours,
-                    writable: true
-                })
-
                 var keys = Object.getOwnPropertyNames(eventTypeHours)
 
                 for (let i = 0; i < keys.length; i++) {
@@ -54,7 +50,12 @@ export function getEventTypeHours() {
                     eventTypeHours[keys[i]] = hours.toString()
                 }
 
-                resolve(eventTypeHours)
+                const result = {
+                    eventTypeHours,
+                    totalHours
+                } satisfies EventTypeHoursResult
+
+                resolve(result)
             })
             .catch(_ => {
                 reject("Failed to export PDF. Try again later or contact the administrator.")
