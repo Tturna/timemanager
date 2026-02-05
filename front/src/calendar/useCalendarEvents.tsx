@@ -65,7 +65,7 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
                             startEditable: true,
                             durationEditable: true,
                             display: "auto" as DisplayMode,
-                            backgroundColor: createdEvent.cssColor,
+                            backgroundColor: createdEvent.eventType.cssColor,
                             classNames: [],
                             styles: [],
                             extendedProps: []
@@ -163,10 +163,12 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
         .then((events: CalendarEventModel[]) => {
             return events
         })
-        .catch(_ => {
+        .catch(reason => {
             if (updateStatusMessage) {
                 updateStatusMessage("Failed to get events. Try again later or contact the administrator.")
             }
+
+            console.log(reason)
 
             if (failureCallback) failureCallback()
             throw new Error("Failed to get events. Try again later or contact the administrator.")
@@ -270,7 +272,7 @@ function useCalendarEvents(updateStatusMessage?: (message: string) => void) :
                     durationEditable: true,
                     display: "auto" as DisplayMode,
                     classNames: [],
-                    backgroundColor: event.cssColor,
+                    backgroundColor: event.eventType.cssColor,
                     styles: [],
                     extendedProps: []
                 } as CalendarEvent

@@ -82,7 +82,7 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
         var startDateTime = DateTime.SpecifyKind(newEventDto.StartDateTime, DateTimeKind.Utc);
         var endDateTime = DateTime.SpecifyKind(newEventDto.EndDateTime, DateTimeKind.Utc);
 
-        var eventType = dbContext.CalendarEventTypes.FirstOrDefault((EventTypeModel cEvent) => cEvent.Name == newEventDto.Title);
+        var eventType = dbContext.CalendarEventTypes.FirstOrDefault((EventTypeModel cEventType) => cEventType.Name == newEventDto.Title);
         var newEventTypeAdded = false;
         string eventColor;
 
@@ -107,11 +107,11 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
 
             eventColor = newEventColorOptions.First();
 
-            foreach (var cEvent in dbContext.CalendarEvents)
+            foreach (var cEventType in dbContext.CalendarEventTypes)
             {
-                if (newEventColorOptions.Contains(cEvent.CssColor))
+                if (newEventColorOptions.Contains(cEventType.CssColor))
                 {
-                    newEventColorOptions.Remove(cEvent.CssColor);
+                    newEventColorOptions.Remove(cEventType.CssColor);
                 }
 
                 if (newEventColorOptions.Count == 0) break;
@@ -130,13 +130,9 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
             eventType = new EventTypeModel
             {
                 Id = Guid.CreateVersion7(),
-                Name = newEventDto.Title
+                Name = newEventDto.Title,
+                CssColor = eventColor
             };
-        }
-        else
-        {
-            var firstSimilarEvent = dbContext.CalendarEvents.First(e => e.EventType == eventType);
-            eventColor = firstSimilarEvent.CssColor;
         }
 
         var newEvent = new CalendarEventModel()
@@ -147,11 +143,6 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
             StartDateTime = startDateTime,
             EndDateTime = endDateTime
         };
-
-        if (eventColor is not null)
-        {
-            newEvent.CssColor = eventColor;
-        }
 
         try
         {
@@ -213,7 +204,7 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
         var newStartDateTime = DateTime.SpecifyKind(newEventDto.StartDateTime, DateTimeKind.Utc);
         var newEndDateTime = DateTime.SpecifyKind(newEventDto.EndDateTime, DateTimeKind.Utc);
 
-        var eventType = dbContext.CalendarEventTypes.FirstOrDefault((EventTypeModel cEvent) => cEvent.Name == newEventDto.Title);
+        var eventType = dbContext.CalendarEventTypes.FirstOrDefault((EventTypeModel cEventType) => cEventType.Name == newEventDto.Title);
         var newEventTypeAdded = false;
 
         if (eventType is null)
@@ -233,19 +224,9 @@ public class CalendarController(ILogger<CalendarController> logger, TimeManagerD
 
         if (newEventDto.CssColor is not null)
         {
-            if (eventToEdit.CssColor != newEventDto.CssColor)
+            if (eventToEdit.EventType.CssColor != newEventDto.CssColor)
             {
-                // Event color was updated. Update color for all event instances.
-                var allEvents = dbContext.CalendarEvents.Where(e => e.EventType == eventToEdit.EventType);
-
-                foreach (var cEvent in allEvents)
-                {
-                    cEvent.CssColor = newEventDto.CssColor;
-                }
-            }
-            else
-            {
-                eventToEdit.CssColor = newEventDto.CssColor;
+                eventToEdit.EventType.CssColor = newEventDto.CssColor;
             }
         }
 

@@ -6,4 +6,5 @@ public sealed record class EventTypeModel
     public Guid Id { get; set; }
     [Required]
     public required string Name { get; set; }
+    public string CssColor { get; set; } = "#0099db";
 }

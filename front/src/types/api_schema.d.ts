@@ -213,12 +213,12 @@ export interface components {
             startDateTime: string;
             /** Format: date-time */
             endDateTime: string;
-            cssColor?: string;
         };
         EventTypeModel: {
             /** Format: uuid */
             id: string;
             name: string;
+            cssColor?: string;
         };
         NewEventDto: {
             title: string;

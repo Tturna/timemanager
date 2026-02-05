@@ -1,4 +1,9 @@
+export type EventTypeHourInfo = Record<string, {
+    color: string,
+    hours: string
+}>
+
 export type EventTypeHoursResult = {
-    eventTypeHours: Record<string, string>
+    eventTypeHours: EventTypeHourInfo
     totalHours: number
 }
